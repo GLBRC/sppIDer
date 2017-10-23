@@ -30,23 +30,23 @@ docker run --rm -it glbrc/sppider -h
 				  be used with -byBP
 ```
 
-### Examples
+### Pipeline Examples
 
 Notes:  
 - Execute the container with a host volume mount, as shown below, to retrieve pipeline output files into the host machine's current working directory  
 - Providing the example "--user" switch will write to output files using permissions of the host user  
 
-Execute pipeline using full paths for clarity:  
+Execute a sppIDer pipeline using full paths for clarity:  
 ```
 docker run \
 --rm -it \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer \
 --user "$UID:$(id -g $USERNAME)" \
 glbrc/sppider \
-  --out GLBRC \
-  --ref /tmp/sppIDer/inputs/SaccharomycesCombo.fasta \
-  --r1 /tmp/sppIDer/inputs/R1_1k.fastq \
-  --r2 /tmp/sppIDer/inputs/R2_1k.fastq
+  --out OUT \
+  --ref /tmp/sppIDer/inputs/REF.fasta \
+  --r1 /tmp/sppIDer/inputs/R1.fastq \
+  --r2 /tmp/sppIDer/inputs/R2.fastq
 ```
 
 Run in the container's working directory, for input brevity:  
@@ -56,11 +56,46 @@ docker run \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer \
 --user "$UID:$(id -g $USERNAME)" \
 glbrc/sppider \
-  --out GLBRC \
-  --ref SaccharomycesCombo.fasta \
-  --r1 R1_1k.fastq \
-  --r2 R2_1k.fastq
+  --out OUT \
+  --ref REF.fasta \
+  --r1 R1.fastq \
+  --r2 R2.fastq
 ```
+
+
+### Generate Pipeline Input Files
+
+_Use of the included combineRefGenomes.py script produces an output that can be used multiple times with different data. You may need to first execute this script to prepare files for your pipeline._
+
+Usage info for combining desired reference genomes:
+```
+docker run --rm -it --entrypoint=/usr/bin/python2.7 glbrc/sppider scripts/combineRefGenomes.py -h
+
+	usage: combineRefGenomes.py [-h] --out OUT --key KEY [--trim TRIM]
+
+	Combine desired reference genomes
+
+	optional arguments:
+	  -h, --help   show this help message and exit
+	  --out OUT    Output prefix, required
+	  --key KEY    Key to reference genomes, required
+	  --trim TRIM  Maximum contig lenght to trim
+```
+
+Generate input files for subsequent sppIDer runs:
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer \
+--user "$UID:$(id -g $USERNAME)" \
+--entrypoint=/usr/bin/python2.7 \
+glbrc/sppider \
+scripts/combineRefGenomes.py \
+  --out OUT \
+  --key KEY \
+  --trim TRIM
+```
+
 
 ### System Requirements 
 
