@@ -132,11 +132,11 @@ trackerOut.close()
 ########################## bedgraph Coverage ###########################
 sortOut = bamSortOut
 if args.bed == True:
-    bedOutD = outputPrefix + "-d.bedgraph"
+    bedOutD = outputPrefix + "_coverage-d.bedgraph"
     bedFileD = open(bedOutD, 'w')
     subprocess.call(["genomeCoverageBed", "-d", "-ibam", sortOut], stdout=bedFileD)
 else:
-    bedOut = outputPrefix+".bedgraph"
+    bedOut = outputPrefix+"_coverage.bedgraph"
     bedFile = open(bedOut, 'w')
     subprocess.call(["genomeCoverageBed", "-bga", "-ibam", sortOut], stdout=bedFile)
 print("bedgraph complete")

@@ -68,23 +68,30 @@ RUN cd /tmp && \
     rm -rf /tmp/bedtools2
 
 
-### R (installed already via apt)
-# R packages
+### R 
+# install needed packages
 RUN R --vanilla -e 'install.packages("dplyr", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 RUN R --vanilla -e 'install.packages("ggplot2", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+
+
+### python 2.7 
+# install pip
+# install biopython and its prereqs
+RUN cd /tmp && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    /usr/bin/python2.7 get-pip.py && \
+    pip install biopython && \
+    pip install numpy
 
 
 ### package sppIDer files
 RUN mkdir -p /tmp/sppIDer
 ADD sppIDer.py /tmp/sppIDer/
-#ADD parseSamFile.py /tmp/sppIDer/
-#ADD scripts/*.R /tmp/sppIDer/scripts/
 ADD scripts/*.* /tmp/sppIDer/scripts/
 
 
 ### execute sppIDer by default
-#WORKDIR /tmp/sppIDer/
-WORKDIR /tmp/working/
+WORKDIR /tmp/sppIDer/
 ENTRYPOINT ["/usr/bin/python2.7","/tmp/sppIDer/sppIDer.py"]
 CMD ["$@"]
 
