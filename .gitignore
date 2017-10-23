@@ -1,0 +1,9 @@
+## .gitignore 
+
+# OS junk
+.DS_Store
+[Tt]humbs.db
+
+# temp files
+.*.swp
+
