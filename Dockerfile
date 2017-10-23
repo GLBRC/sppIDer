@@ -85,13 +85,13 @@ RUN cd /tmp && \
 
 
 ### package sppIDer files
-RUN mkdir -p /tmp/sppIDer
+RUN mkdir -p /tmp/sppIDer/working/
 ADD sppIDer.py /tmp/sppIDer/
 ADD scripts/*.* /tmp/sppIDer/scripts/
 
 
 ### execute sppIDer by default
-WORKDIR /tmp/sppIDer/
+WORKDIR /tmp/sppIDer/working/
 ENTRYPOINT ["/usr/bin/python2.7","/tmp/sppIDer/sppIDer.py"]
 CMD ["$@"]
 

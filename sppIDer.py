@@ -25,6 +25,9 @@ args = parser.parse_args()
 
 #Replace paths
 
+# docker vars
+scriptdir = "/tmp/sppIDer/scripts/"
+
 outputPrefix = args.out
 refGen=args.ref
 read1Name = args.r1
@@ -110,7 +113,7 @@ trackerOut.close()
 
 ########################## parse SAM file ###########################
 #parseInput = outputPrefix+"_aln-pe"
-subprocess.call(["python2.7", "scripts/parseSamFile.py", outputPrefix])
+subprocess.call(["python2.7", scriptdir + "parseSamFile.py", outputPrefix])
 print("Parsed SAM file")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -120,7 +123,7 @@ trackerOut.write("\nParsed SAM\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## plot MQ scores ###########################
-subprocess.call(["Rscript", "scripts/MQscores_sumPlot.R", outputPrefix])
+subprocess.call(["Rscript", scriptdir + "MQscores_sumPlot.R", outputPrefix])
 print("Plotted MQ scores")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -149,9 +152,9 @@ trackerOut.close()
 
 ########################## average Bed ###########################
 if args.bed == True:
-    subprocess.call(["Rscript", "scripts/meanDepth_sppIDer-d.R", outputPrefix])
+    subprocess.call(["Rscript", scriptdir + "meanDepth_sppIDer-d.R", outputPrefix])
 else:
-    subprocess.call(["Rscript", "scripts/meanDepth_sppIDer-bga.R", outputPrefix])
+    subprocess.call(["Rscript", scriptdir + "meanDepth_sppIDer-bga.R", outputPrefix])
 print("Found mean depth")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -162,11 +165,11 @@ trackerOut.close()
 
 ########################## make plot ###########################
 if args.bed == True:
-    subprocess.call(["Rscript", "scripts/sppIDer_depthPlot_forSpc.R", outputPrefix, "d"])
-    subprocess.call(["Rscript", "scripts/sppIDer_depthPlot-d.R", outputPrefix])
+    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "d"])
+    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot-d.R", outputPrefix])
 else:
-    subprocess.call(["Rscript", "scripts/sppIDer_depthPlot_forSpc.R", outputPrefix, "g"])
-    subprocess.call(["Rscript", "scripts/sppIDer_depthPlot-bga.R", outputPrefix])
+    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "g"])
+    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot-bga.R", outputPrefix])
 print("Plot complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
