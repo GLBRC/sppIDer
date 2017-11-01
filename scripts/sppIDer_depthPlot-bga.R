@@ -1,3 +1,5 @@
+#! /usr/bin/Rscript
+options(stringAsFactors=FALSE)
 require(ggplot2)
 plot <- ggplot()
 args <- commandArgs(TRUE)
@@ -42,6 +44,7 @@ speciesBreaks <- c()
 speciesLabelPos <- c()
 chrBreaks <- c()
 prevChrEnd <- 0
+prevSpcEnd <- 0
 #Go though by species and determine mean depth and chromosome lengths.
 #Which species will be included on the stacked plots is determined by if the species 99% mean depth is greater than the overall mean depth.
 for (i in uniSpecies){
@@ -61,7 +64,7 @@ for (i in uniSpecies){
   if (spc99Mean>checkMean) {
     speciesTable <- speciesData
     spcStart <- speciesTable$Genome_Pos[1]
-    speciesTable$speciesPos <- speciesTable$Genome_Pos-spcStart
+    speciesTable$speciesPos <- speciesTable$Genome_Pos - prevSpcEnd
     sigTable <- rbind(sigTable, speciesTable)
   }
   speciesChrs <- unlist(list(unique(speciesData$chrom)))
@@ -74,6 +77,7 @@ for (i in uniSpecies){
     }
     prevChrEnd <- chrData$Genome_Pos[length(chrData$Genome_Pos)]
   }
+  prevSpcEnd <- speciesEnd
 }
 #Add extras to plot including vertical lines to delinate species and if labels will be added to axes
 vertLines <- geom_vline(xintercept = speciesBreaks)
@@ -115,6 +119,7 @@ sigMeanQuant <- quantile(sigTable$meanValue, 0.99, na.rm=T)
 sigSpecies <- unlist(list(unique(sigTable$species)))
 endPos <- 0
 facetDF <- data.frame()
+endsDF <- data.frame()
 prevChrEnd <- 0
 #Restructure the data for just the species of interest
 for (speciesName in sigSpecies) {
@@ -133,6 +138,7 @@ for (speciesName in sigSpecies) {
     }
     prevChrEnd <- chrEnd
   }
+  endsDF <- rbind(endsDF, data.frame("end"=sigFinalEnd, "species"=gsub("_", " ", speciesName)))
 }
 breakInterval <- endPos/10
 breakPos <- seq(0,endPos, by = breakInterval)
@@ -153,8 +159,10 @@ for (i in 2:length(breakPos)) {
 }
 xaxis <- scale_x_continuous(breaks=breakPos, labels=breakLabels, name="Genome Position", limits=c(0,endPos)) 
 plotVert <- theme_classic()
+plotVertEnd <- geom_vline(xintercept = endPos)
 if(nrow(facetDF) != 0) {
   facetVertLines <- geom_vline(aes(xintercept = Breaks), facetDF, linetype=2)
+  plotVertEnd <- geom_vline(aes(xintercept = end), endsDF)
   plotVert <- facetVertLines
 }
 yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
@@ -167,13 +175,15 @@ sigTable$species <- gsub("_", " ", sigTable$species)
 sigSpecies <- gsub("_", " ", sigSpecies)
 
 #Plot data
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, meanValue, colour = species))+geom_point()+facet_grid(species ~ .)+line+theme_classic()+scale_colour_manual(values=sigSpeciesColors, name="Species", breaks=sigSpecies)+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, meanValue, colour = species))+geom_point()+facet_grid(species ~ .)+line+theme_classic()+scale_colour_manual(values=sigSpeciesColors, name="Species", breaks=sigSpecies)+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
 
 yaxis <- scale_y_continuous(name="log2(Average Depth)", limits = c(0,NA))
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, log2, colour = species))+geom_point()+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2(Avg depth of coverage)", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2(Avg depth of coverage)", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, log2, colour = species))+geom_point()+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2(Avg depth of coverage)", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2(Avg depth of coverage)", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
 
 yaxis <- scale_y_continuous(name="Average Depth (limited)", limits = c(0,meanQuant))
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, meanValueLimited, colour = species))+geom_point()+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
-ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos, meanValueLimited, colour = species))+geom_point()+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
+ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(speciesPos))+geom_ribbon(aes(ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=sigSpeciesColors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+theme(legend.text=element_text(face="italic"), strip.text=element_text(face="italic"))+plotVert+geom_vline(xintercept = 0)+plotVertEnd
+
+dev.off()

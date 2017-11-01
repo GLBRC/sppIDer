@@ -13,7 +13,7 @@ from Bio import SeqIO
 parser = argparse.ArgumentParser(description="Combine desired reference genomes")
 parser.add_argument('--out', help="Output prefix, required", required=True)
 parser.add_argument('--key', help="Key to reference genomes, required", required=True)
-parser.add_argument('--trim', help="Maximum contig lenght to trim", default=0)
+parser.add_argument('--trim', help="Maximum contig length to trim", default=0)
 args = parser.parse_args()
 comboGenomeName = args.out
 listName = args.key
@@ -35,7 +35,7 @@ for line in lines:
     fasta = open(genomeName, 'r')
     for seq_record in SeqIO.parse(fasta, "fasta"):
         if len(seq_record.seq)>=trimLength:
-            outGenome.write(">"+uniID+"-"+str(counter)+"\n")
+            outGenome.write(">"+uniID+"-"+str(counter+1)+"\n")
             outGenome.write(str(seq_record.seq)+"\n")
             lengthFile.write(uniID+"-"+str(counter)+"\t"+str(len(seq_record.seq))+"\n")
             sumGenomeLen += len(seq_record.seq)
@@ -57,6 +57,5 @@ for line in lines:
 outGenome.close()
 lengthFile.close()
 
-subprocess.call(["bwa", "index", comboGenomeName])
-subprocess.call(["samtools", "faidx", comboGenomeName])
-
+subprocess.call(["/opt/bifxapps/bin/bwa", "index", comboGenomeName])
+subprocess.call(["/opt/bifxapps/bin/samtools", "faidx", comboGenomeName])

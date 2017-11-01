@@ -1,3 +1,5 @@
+#! /usr/bin/Rscript
+options(stringAsFactors=FALSE)
 require(ggplot2)
 args <- commandArgs(TRUE)
 outputPrefix <- args[1]
@@ -115,3 +117,5 @@ plot(plot+plotTitle+xaxis+yaxis+totalFill+vertLines+line+ theme_classic()+fillLe
 yaxis <- scale_y_continuous(name="log2(avg/whole genome avg)", limits = c(0,max(spcLabeled$log2)+(.1*max(spcLabeled$log2))))
 plotTitle <- ggtitle(paste(outputPrefix, "log2 Mean Avg depth of coverage", sep=" "))
 plot(plot+plotTitle+xaxis+yaxis+totalFillMean+vertLines+line+ theme_classic()+fillLegend+theme(axis.text.x=element_text(face="italic"), legend.text=element_text(face="italic")))
+
+dev.off()

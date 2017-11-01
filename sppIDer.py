@@ -23,8 +23,6 @@ parser.add_argument('--byGroup', help="Calculate coverage by chunks of same cove
 parser.set_defaults(bed=True)
 args = parser.parse_args()
 
-#Replace paths
-
 # docker vars
 scriptdir = "/tmp/sppIDer/scripts/"
 
@@ -72,19 +70,13 @@ else: trackerOut.write("coverage analysis option = by each base pair -d\n")
 trackerOut.close()
 
 ########################## BWA ###########################
-bwaOutName = outputPrefix+"_aln-pe.sam"
+bwaOutName = outputPrefix+".sam"
 bwaOutFile = open(bwaOutName, 'w')
 if args.r2:
     print("Read1=" + read1Name + "\nRead2=" + read2Name)
-    #trackerOut.write("read1=" + read1Name + "\n")
-    #trackerOut.write("read2=" + read2Name + "\n")
-    #trackerOut.close()
     subprocess.call(["bwa", "mem", refGen, read1Name, read2Name], stdout=bwaOutFile)
 else:
-    #read1Name = args.r1
     print("Read1="+read1Name)
-    #trackerOut.write("read1=" + read1Name + "\n")
-    #trackerOut.close()
     subprocess.call(["bwa", "mem", refGen, read1Name], stdout=bwaOutFile)
 print("BWA complete")
 currentTime = time.time()-start
@@ -95,11 +87,8 @@ trackerOut.write("BWA complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## samtools ###########################
-#samViewOut = outputPrefix+"_aln-pe.view.bam"
-samViewOutQual = outputPrefix+"_aln-pe.view.bam"
-#samSortOut = outputPrefix+".sorted.sam"
-bamSortOut = outputPrefix+"_aln-pe.sort.bam"
-#samViewFile = open(samViewOut, 'w')
+samViewOutQual = outputPrefix+".view.bam"
+bamSortOut = outputPrefix+".sort.bam"
 samViewQualFile = open(samViewOutQual, 'w')
 subprocess.call(["samtools", "view", "-q", "3", "-bhSu",  bwaOutName], stdout=samViewQualFile)
 subprocess.call(["samtools", "sort", samViewOutQual, "-o", bamSortOut])
@@ -112,7 +101,6 @@ trackerOut.write("\nSAMTOOLS complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## parse SAM file ###########################
-#parseInput = outputPrefix+"_aln-pe"
 subprocess.call(["python2.7", scriptdir + "parseSamFile.py", outputPrefix])
 print("Parsed SAM file")
 currentTime = time.time()-start

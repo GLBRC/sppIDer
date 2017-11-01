@@ -10,7 +10,7 @@ import sys, re, time
 
 
 inputName = sys.argv[1]
-samName = inputName+"_aln-pe.sam"
+samName = inputName+".sam"
 outputName = inputName+"_MQ.txt"
 start = time.time()
 
@@ -19,9 +19,6 @@ MQscoreDict = {}
 speciesDict["*"] = {}
 speciesDict["*"][0] = 0
 speciesList = ['*']
-
-print(samName)
-
 sam = open(samName, 'r')
 samLines = sam.read().splitlines()
 for line in samLines:
@@ -31,7 +28,7 @@ for line in samLines:
         chrName = chrInfo.split("-")
         speciesName = chrName[0]
         chrNum = int(chrName[1])
-        if chrNum==0:
+        if chrNum==1:
             speciesList.append(speciesName)
             speciesDict[speciesName] = {}
             for i in range(0, 61):
