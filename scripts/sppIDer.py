@@ -24,7 +24,7 @@ parser.set_defaults(bed=True)
 args = parser.parse_args()
 
 # docker vars
-scriptdir = "/tmp/sppIDer/scripts/"
+scriptdir = "/tmp/sppIDer/"
 
 outputPrefix = args.out
 refGen=args.ref

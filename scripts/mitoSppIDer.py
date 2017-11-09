@@ -25,7 +25,7 @@ parser.add_argument('--gff', help="Key to gff file, optional")
 args = parser.parse_args()
 
 # docker vars
-scriptdir = "/tmp/sppIDer/scripts/"
+scriptdir = "/tmp/sppIDer/"
 
 outputPrefix = args.out
 trackerOut = open(outputPrefix+"_mitoSppIDerRun.info", 'w')
