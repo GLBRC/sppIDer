@@ -57,5 +57,5 @@ for line in lines:
 outGenome.close()
 lengthFile.close()
 
-subprocess.call(["/opt/bifxapps/bin/bwa", "index", comboGenomeName])
-subprocess.call(["/opt/bifxapps/bin/samtools", "faidx", comboGenomeName])
+subprocess.call(["bwa", "index", comboGenomeName])
+subprocess.call(["samtools", "faidx", comboGenomeName])
