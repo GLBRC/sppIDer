@@ -48,6 +48,8 @@ dev.off()
 colors <- c()
 sigSpecies <- c()
 sigTable <- data.frame()
+endsDF <- data.frame()
+sigEnds <- data.frame()
 #Go though by species and determine mean depth and chromosome lengths.
 #Which species will be included on the stacked plots is determined by if the species 99% mean depth is greater than the overall mean depth.
 for (i in uniSpecies){
@@ -61,12 +63,17 @@ for (i in uniSpecies){
   if (spc99Mean>meanQuant) {
     sigSpecies <- append(sigSpecies, i)
     sigTable <- rbind(sigTable, speciesData)
+    sigEnds <- rbind(sigEnds, data.frame("end"=spcEnd, "species"=i))
   }
+  spcEnd <- speciesData$end[length(speciesData$end)]
+  endsDF <- rbind(endsDF, data.frame("end"=spcEnd, "species"=i))
 }
 pdf(paste(outputPrefix, "mitoSppIDerDepthPlot-d.pdf", sep='_'), width=14, onefile = TRUE)
 line <- geom_abline(intercept=0, slope=0)
 xaxis <- scale_x_continuous(name="Genome Position", limits=c(0,NA)) 
 yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
+plotVertEnd <- geom_vline(aes(xintercept = end), endsDF)
+plotSigEnds <- geom_vline(aes(xintercept = end), sigEnds)
 
 #If there is a gff key then assign where the coding regions are on the plot and plot the data
 if (exists("gffKey")){
@@ -106,8 +113,8 @@ if (exists("gffKey")){
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosFull))
   xaxis <- scale_x_continuous(name="Genome Position", limits=c(0,NA)) 
   yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
-  print(ggplot()+shade+geom_point(data =transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, meanValue, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species", breaks=uniSpecies)+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data =transform(bedData, species=factor(species, levels=uniSpecies)), aes(x=start, ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data =transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, meanValue, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species", breaks=uniSpecies)+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+geom_vline(xintercept = 0)+plotVertEnd)
+  print(ggplot()+shade+geom_ribbon(data =transform(bedData, species=factor(species, levels=uniSpecies)), aes(x=start, ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+geom_vline(xintercept = 0)+plotVertEnd)
   #Log2 all species
   CDSstartLines <- geom_segment(data=transform(gffKey, species=factor(species, levels=uniSpecies)), aes(x = Start, xend = Start, y =0, yend=maxLog2), colour="black", alpha=0.5)
   CDSendLines <- geom_segment(data=transform(gffKey, species=factor(species, levels=uniSpecies)), aes(x = End, xend = End, y =0, yend=maxLog2), colour="black", alpha=0.5)
@@ -116,9 +123,9 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosLog2))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosLog2))
   yaxis <- scale_y_continuous(name="log2(Average Depth)", limits = c(0,NA))
-  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+CDSstartLines+CDSendLines+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(x=start, ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+CDSstartLines+CDSendLines+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
+  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
+  print(ggplot()+shade+geom_ribbon(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(x=start, ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
   #Limited all species
   CDSstartLines <- geom_segment(data=transform(gffKey, species=factor(species, levels=uniSpecies)), aes(x = Start, xend = Start, y =0, yend=mean99), colour="black", alpha=0.5)
   CDSendLines <- geom_segment(data=transform(gffKey, species=factor(species, levels=uniSpecies)), aes(x = End, xend = End, y =0, yend=mean99), colour="black", alpha=0.5)
@@ -127,8 +134,8 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosLimited))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosLimited))
   yaxis <- scale_y_continuous(name="Average Depth (limited)", limits = c(0,mean99))
-  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, meanValueLimited, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data=transform(bedData, species=factor(species, levels=uniSpecies)),aes(x=start, ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, meanValueLimited, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
+  print(ggplot()+shade+geom_ribbon(data=transform(bedData, species=factor(species, levels=uniSpecies)),aes(x=start, ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
   ##For just sig species
   sigGFF <- data.frame()
   for (speciesName in sigSpecies){
@@ -145,8 +152,8 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosFull))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosFull))
   yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
-  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, meanValue, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, meanValue, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
+  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=meanValue, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
   #Log2 for sig species
   CDSstartLines <- geom_segment(data=transform(sigGFF, species=factor(species, levels=sigSpecies), rm.na=T), aes(x = Start, xend = Start, y =0, yend=maxLog2), colour="black", alpha=0.5)
   CDSendLines <- geom_segment(data=transform(sigGFF, species=factor(species, levels=sigSpecies), rm.na=T), aes(x = End, xend = End, y =0, yend=maxLog2), colour="black", alpha=0.5)
@@ -155,8 +162,8 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosLog2))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosLog2))
   yaxis <- scale_y_continuous(name="log2(Average Depth)", limits = c(0,NA))
-  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, log2, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, log2, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
+  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
   #Limited for sig species
   CDSstartLines <- geom_segment(data=transform(sigGFF, species=factor(species, levels=sigSpecies), rm.na=T), aes(x = Start, xend = Start, y =0, yend=mean99), colour="black", alpha=0.5)
   CDSendLines <- geom_segment(data=transform(sigGFF, species=factor(species, levels=sigSpecies), rm.na=T), aes(x = End, xend = End, y =0, yend=mean99), colour="black", alpha=0.5)
@@ -165,8 +172,8 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosLimited))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=sigSpecies), rm.na=T), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosLimited))
   yaxis <- scale_y_continuous(name="Average Depth (limited)", limits = c(0,mean99))
-  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, meanValueLimited, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
-  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels)
+  print(ggplot()+shade+geom_point(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start, meanValueLimited, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
+  print(ggplot()+shade+geom_ribbon(data=transform(sigTable, species=factor(species, levels=sigSpecies)), aes(x=start, ymin=0, ymax=meanValueLimited, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotSigEnds)
 } else {
   ###Without GFF
   plot(ggplot(transform(bedData, species=factor(species, levels=uniSpecies)))+geom_point(aes(start, meanValue, colour = species), size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species", breaks=uniSpecies)+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" ")))
@@ -178,3 +185,4 @@ if (exists("gffKey")){
   plot(ggplot(transform(sigTable, species=factor(species, levels=sigSpecies)), aes(start))+geom_ribbon(aes(ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" ")))
 }
 
+dev.off()
