@@ -14,13 +14,13 @@ class colors:
 def main():
     print ''
     print colors.blue + colors.bold + 'sppIDer bioinformatics pipeline' + colors.end
-    print colors.blue + colors.underline + '_______________________________' + colors.end
+    print colors.blue + '_______________________________' + colors.end
     print ''
     print 'sppIDer is a pipeline for looking at genome composition in hybrid genomes and checking for chromosomal copy variants in single species strains.'
     print ''
     print 'sppIDer.py is the main wrapper that calls established bioinformatic tools and custom scripts. this pipeline needs a combination reference genome and one or more short read (fastq) files.'
     print ''
-    print colors.blue + 'sppIDer help/syntax:' + colors.end
+    print colors.blue + 'pipeline help/syntax:' + colors.end
     print ''
     print 'docker run --rm -it glbrc/sppider [pipeline_script] --help'
     print ''
@@ -30,6 +30,8 @@ def main():
     print '  combineRefGenomes.py'
     print ''
     print colors.blue + 'sppIDer.py usage example:' + colors.end
+    print ''
+    print 'this command will take a script\'s input files from your current working directory, outputting resultant pipeline files there upon completion.'
     print ''
     print 'docker run \ '
     print '--rm -it \ '
