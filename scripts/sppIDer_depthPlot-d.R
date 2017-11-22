@@ -97,7 +97,7 @@ fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=uniSpeci
 pointLegend <- scale_color_manual(name="Species", values=colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 
 #Plot the data
-pdf(paste(workingDir, outputPrefix, "sppIDerDepthPlot-d.pdf", sep='_'), width=14)
+pdf(paste(workingDir, outputPrefix, "_sppIDerDepthPlot-d.pdf", sep=""), width=14)
 plotTitle <- ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))
 totalPoint <- geom_point(data=bedData, aes(x=Genome_Pos, y=meanValue, colour=species))
 totalPointLim <- geom_point(data=bedData, aes(x=Genome_Pos, y=meanValueLimited, colour=species))

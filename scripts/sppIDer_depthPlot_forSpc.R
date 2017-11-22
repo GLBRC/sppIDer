@@ -106,7 +106,7 @@ vertLines <- geom_vline(xintercept = speciesBreaks)
 fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 pointLegend <- scale_color_manual(name="Species", values=colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 
-pdf(paste(workingDir, outputPrefix, "_speciesDepth.pdf", sep=''), width=14)
+pdf(paste(workingDir, outputPrefix, "_speciesDepth.pdf", sep=""), width=14)
 
 if (length(uniSpecies)<11){
   xaxis <- scale_x_continuous(breaks=labelPos, labels=spcLabels, name="Genome Position", limits=c(0,NA))
