@@ -93,7 +93,7 @@ RUN cd /tmp && \
 
 ### package sppIDer files
 RUN mkdir -p /tmp/sppIDer/working/
-ADD scripts/*.* /tmp/sppIDer/
+ADD scripts/*.py scripts/*.R /tmp/sppIDer/
 
 
 ### execute sppIDer by default

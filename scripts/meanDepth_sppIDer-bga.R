@@ -14,9 +14,11 @@ strainName <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data
-strain <- read.table(paste(strainName, ".bedgraph", sep=""), header=FALSE, col.names = c("chrom", "regionStart", "regionEnd",  "value"))
+strain <- read.table(paste(workingDir, strainName, ".bedgraph", sep=""), header=FALSE, col.names = c("chrom", "regionStart", "regionEnd",  "value"))
 strain$regionLen <- strain$regionEnd-strain$regionStart
 strain$wtValue <- strain$value*strain$regionLen
 genomeEnd <- sum(as.numeric(strain$regionLen))
@@ -28,9 +30,9 @@ totalMean <- sum(as.numeric(strain$wtValue))/genomeEnd
 medianValue<-median(rep(strain$value, strain$regionLen))
 maxValue<-max(strain$value)
 
-spcAvgFile <- paste(strainName, "speciesAvgDepth-g.txt", sep="_")
-chrAvgFile <- paste(strainName, "chrAvgDepth-g.txt", sep="_")
-outputFileName <- paste(strainName, "winAvgDepth-g.txt", sep="_")
+spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-g.txt", sep="")
+chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-g.txt", sep="")
+outputFileName <- paste(workingDir, strainName, "_winAvgDepth-g.txt", sep="")
 
 #completeChromList <- unlist(list(unique(strain$chrom)))
 split <- strsplit(as.character(strain$chrom), "-")

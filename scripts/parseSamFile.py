@@ -8,10 +8,12 @@ import sys, re, time
 # Input: sam file of reads mapped to a combination reference genome
 ################################################################
 
+# docker vars
+workingDir = "/tmp/sppIDer/working/"
 
 inputName = sys.argv[1]
-samName = inputName+".sam"
-outputName = inputName+"_MQ.txt"
+samName = inputName + ".sam"
+outputName = inputName + "_MQ.txt"
 start = time.time()
 
 speciesDict = {}
@@ -19,7 +21,7 @@ MQscoreDict = {}
 speciesDict["*"] = {}
 speciesDict["*"][0] = 0
 speciesList = ['*']
-sam = open(samName, 'r')
+sam = open(workingDir + samName, 'r')
 samLines = sam.read().splitlines()
 for line in samLines:
     if re.match('^(@SQ)', line):
@@ -40,13 +42,13 @@ for line in samLines:
         pos = lineSplit[3]
         MQscore = int(lineSplit[4])
         count = speciesDict[species][MQscore]
-        speciesDict[species][MQscore] = count+1
+        speciesDict[species][MQscore] = count + 1
 
-output = open(outputName, 'w')
+output = open(workingDir + outputName, 'w')
 output.write("Species\tMQscore\tcount\n")
 for species in speciesList:
     for score in speciesDict[species].keys():
-        output.write(species+"\t"+str(score)+"\t"+str(speciesDict[species][score])+"\n")
+        output.write(species + "\t" + str(score) + "\t" + str(speciesDict[species][score]) + "\n")
 
 currentTime = time.time()-start
-print(str(currentTime)+" secs\n")
+print(str(currentTime) + " secs\n")

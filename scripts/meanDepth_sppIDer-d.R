@@ -14,9 +14,11 @@ strainName <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data
-strain <- read.table(paste(strainName, "-d.bedgraph", sep=""), header=FALSE, col.names = c("chrom", "chromPos", "value"))
+strain <- read.table(paste(workingDir, strainName, "-d.bedgraph", sep=""), header=FALSE, col.names = c("chrom", "chromPos", "value"))
 #Set window size so that the full genome is split into 10000 chunks 
 stepSize <- signif(length(strain$chrom)%/%10000, digits = 2)
 print(paste("Step size:", toString(stepSize), sep=" "))
@@ -25,9 +27,9 @@ totalMean <- mean(strain$value)
 maxValue <- max(strain$value)
 medianValue <- median(strain$value)
 
-spcAvgFile <- paste(strainName, "speciesAvgDepth-d.txt", sep="_")
-chrAvgFile <- paste(strainName, "chrAvgDepth-d.txt", sep="_")
-outputFileName <- paste(strainName, "winAvgDepth-d.txt", sep="_")
+spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-d.txt", sep="")
+chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-d.txt", sep="")
+outputFileName <- paste(workingDir, strainName, "_winAvgDepth-d.txt", sep="")
 
 #completeChromList <- unlist(list(unique(strain$chrom)))
 split <- strsplit(as.character(strain$chrom), "-")

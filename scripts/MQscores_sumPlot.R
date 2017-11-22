@@ -12,10 +12,13 @@ strainName <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
+
 #Read in data and determine species
-summaryOutputName <- paste(strainName, "MQsummary.txt", sep="_")
-plotOutputName <- paste(strainName, "plotMQ.pdf", sep="_")
-MQdf <- read.table(paste(strainName, "_MQ.txt", sep=""), header=T)
+summaryOutputName <- paste(workingDir, strainName, "_MQsummary.txt", sep="")
+plotOutputName <- paste(workingDir, strainName, "_plotMQ.pdf", sep="")
+MQdf <- read.table(paste(workingDir, strainName, "_MQ.txt", sep=""), header=T)
 levels(MQdf$Species) <- c(levels(MQdf$Species), "Unmapped")
 MQdf$Species[MQdf$Species=="*"] <- "Unmapped"
 uniSpecies <- unlist(list(unique(MQdf$Species)))

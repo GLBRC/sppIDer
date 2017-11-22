@@ -1,6 +1,6 @@
 __author__ = 'Quinn'
 
-import sys, re, subprocess, time, argparse
+import os, sys, re, subprocess, time, argparse
 
 ################################################################
 # This script runs the full sppIDer pipeline.
@@ -24,7 +24,8 @@ parser.set_defaults(bed=True)
 args = parser.parse_args()
 
 # docker vars
-scriptdir = "/tmp/sppIDer/"
+scriptDir = "/tmp/sppIDer/"
+workingDir = "/tmp/sppIDer/working/"
 
 outputPrefix = args.out
 refGen=args.ref
@@ -59,7 +60,7 @@ def calcElapsedTime( endTime ):
         trackedTime = str(int(endTime)) + " secs"
     return trackedTime
 
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'w')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'w')
 trackerOut.write("outputPrefix="+args.out+"\n")
 trackerOut.write("ref="+refGen+"\n")
 trackerOut.write("read1=" + read1Name + "\n")
@@ -70,53 +71,55 @@ else: trackerOut.write("coverage analysis option = by each base pair -d\n")
 trackerOut.close()
 
 ########################## BWA ###########################
-bwaOutName = outputPrefix+".sam"
-bwaOutFile = open(bwaOutName, 'w')
+bwaOutName = outputPrefix + ".sam"
+bwaOutFile = open(os.path.join(workingDir, bwaOutName), 'w')
+fpathRead1 = os.path.join(workingDir, read1Name)
+fpathRead2 = os.path.join(workingDir, read2Name)
 if args.r2:
     print("Read1=" + read1Name + "\nRead2=" + read2Name)
-    subprocess.call(["bwa", "mem", refGen, read1Name, read2Name], stdout=bwaOutFile)
+    subprocess.call(["bwa", "mem", refGen, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
 else:
-    print("Read1="+read1Name)
-    subprocess.call(["bwa", "mem", refGen, read1Name], stdout=bwaOutFile)
+    print("Read1=" + read1Name)
+    subprocess.call(["bwa", "mem", refGen, fpathRead1], stdout=bwaOutFile, cwd=workingDir)
 print("BWA complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("BWA complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## samtools ###########################
-samViewOutQual = outputPrefix+".view.bam"
-bamSortOut = outputPrefix+".sort.bam"
-samViewQualFile = open(samViewOutQual, 'w')
-subprocess.call(["samtools", "view", "-q", "3", "-bhSu",  bwaOutName], stdout=samViewQualFile)
-subprocess.call(["samtools", "sort", samViewOutQual, "-o", bamSortOut])
+samViewOutQual = outputPrefix + ".view.bam"
+bamSortOut = outputPrefix + ".sort.bam"
+samViewQualFile = open(workingDir + samViewOutQual, 'w')
+subprocess.call(["samtools", "view", "-q", "3", "-bhSu", bwaOutName], stdout=samViewQualFile, cwd=workingDir)
+subprocess.call(["samtools", "sort", samViewOutQual, "-o", bamSortOut], cwd=workingDir)
 print("SAMTOOLS complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nSAMTOOLS complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## parse SAM file ###########################
-subprocess.call(["python2.7", scriptdir + "parseSamFile.py", outputPrefix])
+subprocess.call(["python2.7", scriptDir + "parseSamFile.py", outputPrefix])
 print("Parsed SAM file")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nParsed SAM\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## plot MQ scores ###########################
-subprocess.call(["Rscript", scriptdir + "MQscores_sumPlot.R", outputPrefix])
+subprocess.call(["Rscript", scriptDir + "MQscores_sumPlot.R", outputPrefix], cwd=workingDir)
 print("Plotted MQ scores")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nMQ scores plotted\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
@@ -124,45 +127,45 @@ trackerOut.close()
 sortOut = bamSortOut
 if args.bed == True:
     bedOutD = outputPrefix + "-d.bedgraph"
-    bedFileD = open(bedOutD, 'w')
-    subprocess.call(["genomeCoverageBed", "-d", "-ibam", sortOut], stdout=bedFileD)
+    bedFileD = open(workingDir + bedOutD, 'w')
+    subprocess.call(["genomeCoverageBed", "-d", "-ibam", sortOut], stdout=bedFileD, cwd=workingDir)
 else:
-    bedOut = outputPrefix+".bedgraph"
-    bedFile = open(bedOut, 'w')
-    subprocess.call(["genomeCoverageBed", "-bga", "-ibam", sortOut], stdout=bedFile)
+    bedOut = outputPrefix + ".bedgraph"
+    bedFile = open(workingDir + bedOut, 'w')
+    subprocess.call(["genomeCoverageBed", "-bga", "-ibam", sortOut], stdout=bedFile, cwd=workingDir)
 print("bedgraph complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nbedgraph complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## average Bed ###########################
 if args.bed == True:
-    subprocess.call(["Rscript", scriptdir + "meanDepth_sppIDer-d.R", outputPrefix])
+    subprocess.call(["Rscript", scriptDir + "meanDepth_sppIDer-d.R", outputPrefix], cwd=workingDir)
 else:
-    subprocess.call(["Rscript", scriptdir + "meanDepth_sppIDer-bga.R", outputPrefix])
+    subprocess.call(["Rscript", scriptDir + "meanDepth_sppIDer-bga.R", outputPrefix], cwd=workingDir)
 print("Found mean depth")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nFound mean depth\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## make plot ###########################
 if args.bed == True:
-    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "d"])
-    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot-d.R", outputPrefix])
+    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "d"], cwd=workingDir)
+    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-d.R", outputPrefix], cwd=workingDir)
 else:
-    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "g"])
-    subprocess.call(["Rscript", scriptdir + "sppIDer_depthPlot-bga.R", outputPrefix])
+    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "g"], cwd=workingDir)
+    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-bga.R", outputPrefix], cwd=workingDir)
 print("Plot complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
 print("Elapsed time: " + elapsedTime)
-trackerOut = open(outputPrefix+"_sppIDerRun.info", 'a')
+trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nPlot complete\nElapsed time: " + elapsedTime + "\n")
 trackerOut.close()
 

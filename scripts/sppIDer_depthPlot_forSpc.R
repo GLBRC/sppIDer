@@ -13,9 +13,12 @@ depthOpt <- args[2]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
+
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData.wWholeGenome <- read.table(paste(outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
-bedData <- read.table(paste(outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
+bedData.wWholeGenome <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
+bedData <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
 completeChromList <- unlist(list(unique(bedData$species)))
 output <- data.frame()
 
@@ -103,7 +106,7 @@ vertLines <- geom_vline(xintercept = speciesBreaks)
 fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 pointLegend <- scale_color_manual(name="Species", values=colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 
-pdf(paste(outputPrefix, "_speciesDepth.pdf", sep=''), width=14)
+pdf(paste(workingDir, outputPrefix, "_speciesDepth.pdf", sep=''), width=14)
 
 if (length(uniSpecies)<11){
   xaxis <- scale_x_continuous(breaks=labelPos, labels=spcLabels, name="Genome Position", limits=c(0,NA))
