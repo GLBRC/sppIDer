@@ -13,9 +13,12 @@ outputPrefix <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
+
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData <- read.table(paste(outputPrefix, "winAvgDepth-g.txt", sep="_"), header=T)
-bedData <- read.table(paste(outputPrefix, "winAvgDepth-g.txt", sep="_"), header=F, skip=2, col.names = c("Genome_Pos", "species", "chrom", "start",  "end", "meanValue", "log2mean", "max", "median"))
+bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-g.txt", sep=""), header=T)
+bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-g.txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species", "chrom", "start",  "end", "meanValue", "log2mean", "max", "median"))
 completeChromList <- unlist(list(unique(bedData$chrom)))
 stepSize <- bedData[2,1]
 checkMean <- mean(bedData$meanValue)
@@ -94,7 +97,7 @@ fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=uniSpeci
 pointLegend <- scale_color_manual(name="Species", values=colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 
 #Plot the data
-pdf(paste(outputPrefix, "sppIDerDepthPlot-g.pdf", sep='_'), width=14)
+pdf(paste(workingDir, outputPrefix, "_sppIDerDepthPlot-g.pdf", sep=""), width=14)
 plotTitle <- ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))
 totalPoint <- geom_point(data=bedData, aes(x=Genome_Pos, y=meanValue, colour=species))
 totalFill <- geom_ribbon(data=bedData, aes(x=Genome_Pos, ymin=0, ymax=meanValue, fill=species))

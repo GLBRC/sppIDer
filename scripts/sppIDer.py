@@ -1,6 +1,6 @@
 __author__ = 'Quinn'
 
-import os, sys, re, subprocess, time, argparse
+import sys, re, subprocess, time, argparse
 
 ################################################################
 # This script runs the full sppIDer pipeline.
@@ -72,15 +72,13 @@ trackerOut.close()
 
 ########################## BWA ###########################
 bwaOutName = outputPrefix + ".sam"
-bwaOutFile = open(os.path.join(workingDir, bwaOutName), 'w')
-fpathRead1 = os.path.join(workingDir, read1Name)
-fpathRead2 = os.path.join(workingDir, read2Name)
+bwaOutFile = open(workingDir + bwaOutName, 'w')
 if args.r2:
     print("Read1=" + read1Name + "\nRead2=" + read2Name)
     subprocess.call(["bwa", "mem", refGen, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
 else:
     print("Read1=" + read1Name)
-    subprocess.call(["bwa", "mem", refGen, fpathRead1], stdout=bwaOutFile, cwd=workingDir)
+    subprocess.call(["bwa", "mem", refGen, read1Name], stdout=bwaOutFile, cwd=workingDir)
 print("BWA complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)

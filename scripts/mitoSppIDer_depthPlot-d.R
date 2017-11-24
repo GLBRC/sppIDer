@@ -11,16 +11,18 @@ outputPrefix <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData <- read.table(paste(outputPrefix, "winAvgDepth-d.txt", sep="_"), header=T)
-bedData <- read.table(paste(outputPrefix, "winAvgDepth-d.txt", sep="_"), header=F, skip=2, col.names = c("Genome_Pos", "species", "chrom", "start",  "end", "meanValue", "relativeMean", "max", "median"))
+bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=T)
+bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species", "chrom", "start",  "end", "meanValue", "relativeMean", "max", "median"))
 #Read in gff dat if it exists
 if (length(args)==2){
   gffKey <- read.table(args[2], header=T)
   names(gffKey)[names(gffKey)=="Species"] <- "species"
 }
-covMeanFile <- paste(outputPrefix, "mitoAvgDepthSummary-d.txt", sep="_")
+covMeanFile <- paste(workingDir, outputPrefix, "_mitoAvgDepthSummary-d.txt", sep="")
 stepSize <- bedData[2,1]
 checkMean <- mean(bedData$meanValue)
 meanQuant <- quantile(bedData$meanValue, 0.97, na.rm=T)
@@ -68,7 +70,7 @@ for (i in uniSpecies){
   spcEnd <- speciesData$end[length(speciesData$end)]
   endsDF <- rbind(endsDF, data.frame("end"=spcEnd, "species"=i))
 }
-pdf(paste(outputPrefix, "mitoSppIDerDepthPlot-d.pdf", sep='_'), width=14, onefile = TRUE)
+pdf(paste(workingDir, outputPrefix, "mitoSppIDerDepthPlot-d.pdf", sep=""), width=14, onefile = TRUE)
 line <- geom_abline(intercept=0, slope=0)
 xaxis <- scale_x_continuous(name="Genome Position", limits=c(0,NA)) 
 yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
