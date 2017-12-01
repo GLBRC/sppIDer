@@ -21,7 +21,7 @@ workingDir <- "/tmp/sppIDer/working/"
 strain <- read.table(paste(workingDir, strainName, ".bedgraph", sep=""), header=FALSE, col.names = c("chrom", "regionStart", "regionEnd",  "value"))
 strain$regionLen <- strain$regionEnd-strain$regionStart
 dataGenomeLen <- sum(as.numeric(strain$regionLen))
-chrLens <- read.table(paste(workingDir, strainName, "chrLens.txt", sep="_"), header=F, col.names=c("chrom", "length"))
+chrLens <- read.table(paste(workingDir, strainName, "_chrLens.txt", sep=""), header=F, col.names=c("chrom", "length"))
 genomeEnd <- sum(as.numeric(chrLens$length))
 if(genomeEnd!=dataGenomeLen){
   dataUniChr <- unique(strain$chrom)
@@ -42,9 +42,9 @@ totalMean <- sum(as.numeric(strain$wtValue))/genomeEnd
 medianValue<-median(rep(strain$value, strain$regionLen))
 maxValue<-max(strain$value)
 
-spcAvgFile <- paste(workingDir, strainName, "speciesAvgDepth-g.txt", sep="_")
-chrAvgFile <- paste(workingDir, strainName, "chrAvgDepth-g.txt", sep="_")
-outputFileName <- paste(workingDir, strainName, "winAvgDepth-g.txt", sep="_")
+spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-g.txt", sep="")
+chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-g.txt", sep="")
+outputFileName <- paste(workingDir, strainName, "_winAvgDepth-g.txt", sep="")
 
 #completeChromList <- unlist(list(unique(strain$chrom)))
 split <- strsplit(as.character(strain$chrom), "-")

@@ -24,10 +24,10 @@ trimLength = int(args.trim)
 
 #Replace paths
 comboTotalLen = 0
-lengthFile = open(workingDir+"comboLength_"+comboGenomeName+".txt", 'w')
-lengthFile.write(comboGenomeName+"\tTrimmed contigs >"+str(trimLength)+"\n")
-outGenome = open(comboGenomeName, 'w')
-list = open(listName, 'r')
+lengthFile = open(workingDir + "comboLength_" + comboGenomeName + ".txt", 'w')
+lengthFile.write(comboGenomeName + "\tTrimmed contigs >" + str(trimLength)+"\n")
+outGenome = open(workingDir + comboGenomeName, 'w')
+list = open(workingDir + listName, 'r')
 lines = list.readlines()
 for line in lines:
     line = line.strip().split('\t')
@@ -35,7 +35,7 @@ for line in lines:
     genomeName = line[1]
     sumGenomeLen = 0
     counter = 0
-    fasta = open(genomeName, 'r')
+    fasta = open(workingDir + genomeName, 'r')
     for seq_record in SeqIO.parse(fasta, "fasta"):
         #print(len(seq_record.seq))
         if len(seq_record.seq)>=trimLength:
@@ -93,5 +93,5 @@ lengthFile.write("Combo-totalGenome\t" + strComboLen + "\n")
 outGenome.close()
 lengthFile.close()
 
-subprocess.call(["bwa", "index", workingDir+comboGenomeName])
-subprocess.call(["samtools", "faidx", workingDir+comboGenomeName])
+subprocess.call(["bwa", "index", comboGenomeName], cwd=workingDir)
+subprocess.call(["samtools", "faidx", comboGenomeName], cwd=workingDir)
