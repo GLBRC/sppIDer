@@ -26,7 +26,7 @@ trimLength = int(args.trim)
 comboTotalLen = 0
 lengthFile = open(workingDir+"comboLength_"+comboGenomeName+".txt", 'w')
 lengthFile.write(comboGenomeName+"\tTrimmed contigs >"+str(trimLength)+"\n")
-outGenome = open(workingDir+comboGenomeName, 'w')
+outGenome = open(comboGenomeName, 'w')
 list = open(listName, 'r')
 lines = list.readlines()
 for line in lines:
