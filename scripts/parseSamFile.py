@@ -14,6 +14,7 @@ workingDir = "/tmp/sppIDer/working/"
 inputName = sys.argv[1]
 samName = inputName + ".sam"
 outputName = inputName + "_MQ.txt"
+outputLenName = inputName + "_chrLens.txt"
 start = time.time()
 
 speciesDict = {}
@@ -21,6 +22,7 @@ MQscoreDict = {}
 speciesDict["*"] = {}
 speciesDict["*"][0] = 0
 speciesList = ['*']
+outputLen = open(workingDir + outputLenName, 'w')
 sam = open(workingDir + samName, 'r')
 samLines = sam.read().splitlines()
 for line in samLines:
@@ -30,6 +32,8 @@ for line in samLines:
         chrName = chrInfo.split("-")
         speciesName = chrName[0]
         chrNum = int(chrName[1])
+        chrLen = headerInfo[2].split(":")[1]
+        outputLen.write(chrInfo+"\t"+chrLen+"\n")
         if chrNum==1:
             speciesList.append(speciesName)
             speciesDict[speciesName] = {}
@@ -43,6 +47,7 @@ for line in samLines:
         MQscore = int(lineSplit[4])
         count = speciesDict[species][MQscore]
         speciesDict[species][MQscore] = count + 1
+outputLen.close()
 
 output = open(workingDir + outputName, 'w')
 output.write("Species\tMQscore\tcount\n")
