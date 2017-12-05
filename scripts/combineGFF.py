@@ -12,7 +12,7 @@ import sys, re, argparse
 ################################################################
 
 # docker vars
-workingDir = "/tmp/sppIDer/working/"
+workingDir = "./"
 
 parser = argparse.ArgumentParser(description="Combine desired reference gffs of coding regions")
 parser.add_argument('--out', help="Output prefix, required", required=True)
