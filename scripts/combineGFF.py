@@ -1,11 +1,27 @@
 #!/usr/bin/env python
-import sys
-import re
+import sys, re, argparse
 
-comboGFFName = sys.argv[1]
-listName = sys.argv[2]
+################################################################
+# This script will create a file to demark and label coding regions for mitoSppIDer.
+#
+#Input: output name, text file key of gff files
+#Key format: ReferenceName  gffFileName.gff
+#The "ReferenceName" should be the same as used to build the combo fasta
+#The "gffFileName.gff" is a gff formatted file with the regions you wish to plot.
+#
+################################################################
 
-outGFF = open(comboGFFName, 'w')
+# docker vars
+workingDir = "/tmp/sppIDer/working/"
+
+parser = argparse.ArgumentParser(description="Combine desired reference gffs of coding regions")
+parser.add_argument('--out', help="Output prefix, required", required=True)
+parser.add_argument('--key', help="Key to reference gff files, required", required=True)
+args = parser.parse_args()
+comboGFFName = args.out
+listName = args.key
+
+outGFF = open(workingDir+comboGFFName, 'w')
 outGFF.write("Species\tStart\tEnd\tMidpoint\tName\n")
 list = open(listName, 'r')
 species = list.readlines()

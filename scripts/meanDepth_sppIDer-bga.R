@@ -20,8 +20,20 @@ workingDir <- "/tmp/sppIDer/working/"
 #Read in data
 strain <- read.table(paste(workingDir, strainName, ".bedgraph", sep=""), header=FALSE, col.names = c("chrom", "regionStart", "regionEnd",  "value"))
 strain$regionLen <- strain$regionEnd-strain$regionStart
+dataGenomeLen <- sum(as.numeric(strain$regionLen))
+chrLens <- read.table(paste(workingDir, strainName, "_chrLens.txt", sep=""), header=F, col.names=c("chrom", "length"))
+genomeEnd <- sum(as.numeric(chrLens$length))
+if(genomeEnd!=dataGenomeLen){
+  dataUniChr <- unique(strain$chrom)
+  missingChr <- setdiff(chrLens$chrom, dataUniChr)
+  for(chrName in missingChr){
+    chrLen <- chrLens$length[which(chrLens$chrom==chrName)]
+    chrDF <- data.frame(chrom=chrName, regionStart=0, regionEnd=chrLen, value=0, regionLen=chrLen)
+    strain <- rbind(strain, chrDF)
+  }
+}
+
 strain$wtValue <- strain$value*strain$regionLen
-genomeEnd <- sum(as.numeric(strain$regionLen))
 #Set window size so that the full genome is split into 10000 chunks 
 stepSize <- signif(genomeEnd%/%10000, digits = 2)
 windowBounds <- seq(0, genomeEnd, by=stepSize)
@@ -37,17 +49,9 @@ outputFileName <- paste(workingDir, strainName, "_winAvgDepth-g.txt", sep="")
 #completeChromList <- unlist(list(unique(strain$chrom)))
 split <- strsplit(as.character(strain$chrom), "-")
 strain$species <- unlist(lapply(split, function(x) x[1]))
-strain$chr <- unlist(lapply(split, function(x) x[2]))
-#uniSpecies <- unique(unlist(lapply(split, function(x) x[1])))
-#Split chr name from spcecies name
-#species <- c()
-#for (i in 1:length(completeChromList)) {
-#  completeChrString <- toString(completeChromList[[i]])
-#  split <- strsplit(completeChrString, "-")
-#  species <- c(species, split[1])
-#}
-#uniSpecies <- unique(species)
+strain$chr <- as.numeric(unlist(lapply(split, function(x) x[2])))
 
+speciesDataOrdered <- list()
 speciesData <- splitBy("species", strain)
 speciesSummary <-data.frame(Genome_Pos=numeric(), species=character(), genomeLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
 spcCumLen <- 0
@@ -61,6 +65,7 @@ for (i in 1:length(speciesData)){
   speciesSummary[i,5] <- log2(sum(as.numeric(speciesData[[i]]$wtValue)/spcLen)/totalMean)
   speciesSummary[i,7] <- median(rep(speciesData[[i]]$value, speciesData[[i]]$regionLen))
   spcCumLen = spcCumLen + spcLen
+  speciesDataOrdered[[i]] <- speciesData[[i]][order(speciesData[[i]]$chr),]
 }
 spcAvgOutput <- data.frame("Genome_Pos"=0, "species" = "all", "genomeLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 spcAvgOutput <- rbind(spcAvgOutput, speciesSummary)
@@ -69,7 +74,7 @@ spcAvgOutput[which(spcAvgOutput$log2mean<0),"log2mean"]=0
 spcAvgOutput[1,1] <- "wholeGenome"
 write.table(format(spcAvgOutput, scientific=FALSE), file=spcAvgFile, row.names=F, sep = "\t", quote = FALSE) 
 
-chrData <- lapply(speciesData, function(x) splitBy("chr", x))
+chrData <- lapply(speciesDataOrdered, function(x) splitBy("chr", x))
 chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
 winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
 chrCumLen <- 0
@@ -122,60 +127,3 @@ summaryInfo[which(is.infinite(summaryInfo$log2mean)==T),"log2mean"]=0
 summaryInfo[which(summaryInfo$log2mean<0),"log2mean"]=0
 summaryInfo[1,1] <- "wholeGenome"
 write.table(format(summaryInfo, scientific=FALSE), file=outputFileName, row.names=F, sep = "\t", quote = FALSE) 
-
-# #chrAvgOutput <- data.frame("Genome_Pos"="wholeGenome", "chrom" = "all", "chrLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
-# #write.table(format(chrAvgOutput, scientific=FALSE), file=chrAvgFile, row.names=F, sep = "\t", quote = FALSE)
-# #chrCumLen <- 0
-# #wGenomeLen <- data.frame()
-# #Go though by chromosome and print summary data about depth of coverage to a file
-# # for (i in 1:length(completeChromList)) {
-# #   chrName <- toString(completeChromList[[i]])
-# #   chr <- subset(strain, chrom==chrName)
-# #   chrLength <- sum(as.numeric(chr$regionLen))
-# #   chrMean <- sum(as.numeric(chr$wtValue))/chrLength
-# #   chrMedian <- median(rep(chr$value, chr$regionLen))
-# #   chrAvg <- data.frame("Genome_Pos"=chrCumLen, "chrom" = chrName, "chrLen"=chrLength, "meanValue" = chrMean, "log2mean"=log2(chrMean/totalMean), "max"=max(chr$value), "median"=chrMedian)
-# #   write.table(format(chrAvg, scientific=FALSE), file=chrAvgFile, append = T, col.names=F, row.names=F, sep = "\t", quote = FALSE)
-# #   chrAvgOutput <- rbind(chrAvgOutput, chrAvg)
-# #   chrWgenomeLen <- chr
-# #   chrWgenomeLen$Genome_Pos <- chr$regionStart + chrCumLen
-# #   wGenomeLen <- rbind(wGenomeLen, chrWgenomeLen)
-# #   chrCumLen <- chrCumLen + chrLength
-# # }
-# 
-# summaryInfo <- data.frame("Genome_Pos"="wholeGenome","species"="all", "chrom" = "all", "winStart"=0, "winEnd"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
-# write.table(format(summaryInfo, scientific=FALSE), file=outputFileName, row.names=F, sep = "\t", quote = FALSE) 
-# win.output <- data.frame()
-# counter = 0
-# #Go though by windows and print summary data about depth of coverage to a file
-# while (counter < genomeEnd) {
-#     window <- subset(wGenomeLen, (wGenomeLen$Genome_Pos>=counter & wGenomeLen$Genome_Pos<=counter+stepSize))
-#     if (length(window$chrom)>0) {
-#       window.out <- data.frame(Genome_Pos=counter, species=NA, chrom = NA, chromstart = NA, chromend = NA, meanValue = NA, log2mean=NA, max=NA, median=NA)
-#       chrName <- window$chrom[1]
-#       split <- unlist(strsplit(toString(chrName), "-"))
-#       speciesName <- split[1]
-#       window.out$species <- speciesName
-#       window.out$chrom <- chrName 
-#       if (!is.na(window[1,2])) {
-#         window.out$chromstart <- window$regionStart[1]
-#         window.out$chromend <- window$regionEnd[length(window$regionEnd)]
-#         window.out$meanValue <-  sum(as.numeric(window$wtValue))/stepSize
-#         window.out$log2mean <- log2((sum(as.numeric(window$wtValue))/stepSize)/totalMean)
-#         window.out$median <- median(rep(window$value, window$regionLen))
-#         window.out$max <- max(window$value)
-#       } else if (is.na(window[1,2])) {
-#         window.out$chromstart <- newStart
-#         window.out$chromend <- counter + stepSize
-#         window.out$meanValue <-  0
-#         window.out$log2mean <- 0
-#         window.out$median <- 0
-#         window.out$max <- 0
-#       }
-#       write.table(format(window.out, scientific=FALSE), file=outputFileName, append = T, col.names=F, row.names=F, sep = "\t", quote = FALSE)
-#       counter = counter + stepSize 
-#       win.output <- rbind(win.output, window.out)
-#     } else {
-#       counter = counter + stepSize 
-#     }
-# }

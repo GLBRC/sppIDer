@@ -20,9 +20,21 @@ workingDir <- "/tmp/sppIDer/working/"
 #Read in data
 strain <- read.table(paste(workingDir, strainName, "-d.bedgraph", sep=""), header=FALSE, col.names = c("chrom", "chromPos", "value"))
 #Set window size so that the full genome is split into 10000 chunks 
-stepSize <- signif(length(strain$chrom)%/%10000, digits = 2)
+dataGenomeLen <- length(strain$chromPos)
+chrLens <- read.table(paste(workingDir, strainName, "_chrLens.txt", sep=""), header=F, col.names=c("chrom", "length"))
+genomeEnd <- sum(as.numeric(chrLens$length))
+if(genomeEnd!=dataGenomeLen){
+  dataUniChr <- unique(strain$chrom)
+  missingChr <- setdiff(chrLens$chrom, dataUniChr)
+  for(chrName in missingChr){
+    chrLen <- chrLens$length[which(chrLens$chrom==chrName)]
+    chrDF <- data.frame(chrom=rep(chrName, chrLen), chromPos=seq(1,chrLen, by=1), value=rep(0, chrLen))
+    strain <- rbind(strain, chrDF)
+  }
+}
+
+stepSize <- signif(genomeEnd%/%10000, digits = 2)
 print(paste("Step size:", toString(stepSize), sep=" "))
-genomeEnd <- strain$chromPos[length(strain$chromPos)]
 totalMean <- mean(strain$value)
 maxValue <- max(strain$value)
 medianValue <- median(strain$value)
@@ -34,19 +46,9 @@ outputFileName <- paste(workingDir, strainName, "_winAvgDepth-d.txt", sep="")
 #completeChromList <- unlist(list(unique(strain$chrom)))
 split <- strsplit(as.character(strain$chrom), "-")
 strain$species <- unlist(lapply(split, function(x) x[1]))
-strain$chr <- unlist(lapply(split, function(x) x[2]))
+strain$chr <- as.numeric(unlist(lapply(split, function(x) x[2])))
 
-#completeChromList <- unlist(list(unique(strain$chrom)))
-# species <- c()
-# #Split chr name from spcecies name
-# for (i in 1:length(completeChromList)) {
-#   completeChrString <- toString(completeChromList[[i]])
-#   split <- unlist(strsplit(completeChrString, "-"))
-#   species <- c(species, split[1])
-# }
-# uniSpecies <- unique(species)
-
-
+speciesDataOrdered <- list()
 speciesData <- splitBy("species", strain)
 speciesSummary <-data.frame(Genome_Pos=numeric(), species=character(), genomeLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
 spcCumLen <- 0
@@ -60,6 +62,7 @@ for (i in 1:length(speciesData)){
   speciesSummary[i,5] <- log2(mean(speciesData[[i]]$value/spcLen)/totalMean)
   speciesSummary[i,7] <- median(speciesData[[i]]$value)
   spcCumLen = spcCumLen + spcLen
+  speciesDataOrdered[[i]] <- speciesData[[i]][order(speciesData[[i]]$chr),]
 }
 spcAvgOutput <- data.frame("Genome_Pos"=0, "species" = "all", "genomeLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 spcAvgOutput <- rbind(spcAvgOutput, speciesSummary)
@@ -68,7 +71,7 @@ spcAvgOutput[which(spcAvgOutput$log2mean<0),"log2mean"]=0
 spcAvgOutput[1,1] <- "wholeGenome"
 write.table(format(spcAvgOutput, scientific=FALSE), file=spcAvgFile, row.names=F, sep = "\t", quote = FALSE) 
 
-chrData <- lapply(speciesData, function(x) splitBy("chr", x))
+chrData <- lapply(speciesDataOrdered, function(x) splitBy("chr", x))
 chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
 winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
 chrCumLen <- 0
