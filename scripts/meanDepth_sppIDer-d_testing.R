@@ -6,8 +6,9 @@ suppressMessages(require("doBy"))
 suppressMessages(require("data.table"))
 args <- commandArgs(TRUE)
 strainName <- args[1]
+print(strainName)
 
-#library(tictoc)
+#suppressMessages(require("tictoc"))
 ################################################################
 # This script averages the depth for species, chromosomes, and windows with the -byBP option
 #
@@ -19,9 +20,9 @@ strainName <- args[1]
 # docker vars
 workingDir <- "./"
 
-spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-d.txt", sep="")
-chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-d.txt", sep="")
-outputFileName <- paste(workingDir, strainName, "_winAvgDepth-d.txt", sep="")
+spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth_newTest-d.txt", sep="")
+chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth_newTest-d.txt", sep="")
+outputFileName <- paste(workingDir, strainName, "_winAvgDepth_newTest-d.txt", sep="")
 dataFileName <- paste(workingDir, strainName, "-d.bedgraph", sep="")
 
 chrLens <- read.table(paste(workingDir, strainName, "_chrLens.txt", sep=""), header=F, col.names=c("chrom", "length"))
@@ -44,21 +45,19 @@ spcAvgOutput <- data.frame("Genome_Pos"="wholeGenome", "species" = "all", "genom
 write.table(format(spcAvgOutput, scientific=FALSE), file=spcAvgFile, row.names=F, sep = "\t", quote = FALSE)
 spcCumLen <- 0
 i=1
-chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
 chrAvgOutput <- data.frame("Genome_Pos"="wholeGenome", "chrom" = "all", "chrLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 write.table(format(chrAvgOutput, scientific=FALSE), file=chrAvgFile, row.names=F, sep = "\t", quote = FALSE)
 summaryInfo <- data.frame("Genome_Pos"="wholeGenome","species"="all", "chrom" = "all", "winStart"=0, "winEnd"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 write.table(format(summaryInfo, scientific=FALSE), file=outputFileName, row.names=F, sep = "\t", quote = FALSE) 
-winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
 chrCumLen <- 0
-tic("Whole loop")
+#tic("Whole loop")
 for (species in uniSpecies) {
   spcChrLens <- chrLens[which(chrLens$species==species),]
   speciesData <- fread(paste("grep", species, dataFileName, sep=" "), col.names = c("chrom", "chromPos", "value"))
   print(species)
   dataUniChr <- unique(speciesData$chrom)
   missingChr <- setdiff(spcChrLens$chrom, dataUniChr)
-  tic("Add missing data")
+  #tic("Add missing data")
   if (length(missingChr)>0){
     for(chrName in missingChr){
       chrLen <- spcChrLens$length[which(spcChrLens$chrom==chrName)]
@@ -66,12 +65,12 @@ for (species in uniSpecies) {
       speciesData <- rbind(speciesData, chrDF)
     }
   }
-  toc()
-  tic("Split")
+  #toc()
+  #tic("Split")
   split <- strsplit(as.character(speciesData$chrom), "-")
   speciesData$species <- unlist(lapply(split, function(x) x[1]))
   speciesData$chr <- as.numeric(unlist(lapply(split, function(x) x[2])))
-  toc()
+  #toc()
   #tic("Species Summary")
   speciesDataOrdered <- speciesData[order(speciesData$chr),]
   spcLen <- sum(spcChrLens$length)
@@ -91,6 +90,8 @@ for (species in uniSpecies) {
   spcCumLen = spcCumLen + spcLen
   i=i+1
   #toc()
+  chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
+  winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
   j=1
   m=1
   chrData <- splitBy("chr", speciesDataOrdered)
@@ -146,7 +147,7 @@ for (species in uniSpecies) {
   write.table(format(winSummary, scientific=FALSE), file=outputFileName, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T) 
 }
 write.table(format(speciesSummary, scientific=FALSE), file=spcAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
-toc()
+#toc()
 
 # #Read in data
 # strain <- read.table(paste(strainName, "-d.bedgraph", sep=""), header=FALSE, col.names = c("chrom", "chromPos", "value"))
