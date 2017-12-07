@@ -44,7 +44,7 @@ speciesSummary <-data.frame(Genome_Pos=numeric(), species=character(), genomeLen
 spcAvgOutput <- data.frame("Genome_Pos"="wholeGenome", "species" = "all", "genomeLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 write.table(format(spcAvgOutput, scientific=FALSE), file=spcAvgFile, row.names=F, sep = "\t", quote = FALSE)
 spcCumLen <- 0
-i=1
+#i=1
 chrAvgOutput <- data.frame("Genome_Pos"="wholeGenome", "chrom" = "all", "chrLen"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
 write.table(format(chrAvgOutput, scientific=FALSE), file=chrAvgFile, row.names=F, sep = "\t", quote = FALSE)
 summaryInfo <- data.frame("Genome_Pos"="wholeGenome","species"="all", "chrom" = "all", "winStart"=0, "winEnd"=genomeEnd, "meanValue" = totalMean, "log2mean"=1, "max"=maxValue, "median"=medianValue)
@@ -74,21 +74,22 @@ for (species in uniSpecies) {
   #tic("Species Summary")
   speciesDataOrdered <- speciesData[order(speciesData$chr),]
   spcLen <- sum(spcChrLens$length)
-  speciesSummary[i,1] <- spcCumLen
-  speciesSummary[i,2] <- species
-  speciesSummary[i,3] <- spcLen
-  speciesSummary[i,4] <- mean(speciesData$value)
-  speciesSummary[i,6] <- max(speciesData$value, na.rm=T)
+  speciesSummary[1,1] <- spcCumLen
+  speciesSummary[1,2] <- species
+  speciesSummary[1,3] <- spcLen
+  speciesSummary[1,4] <- mean(speciesData$value)
+  speciesSummary[1,6] <- max(speciesData$value, na.rm=T)
   log2 <- log2(mean(speciesData$value/spcLen)/totalMean)
   if (log2<0) {
     log2 <- 0
   } else if (is.infinite(log2)) {
     log2 <- 0
   }
-  speciesSummary[i,5] <- log2
-  speciesSummary[i,7] <- median(speciesData$value)
+  speciesSummary[1,5] <- log2
+  speciesSummary[1,7] <- median(speciesData$value)
   spcCumLen = spcCumLen + spcLen
-  i=i+1
+  write.table(format(speciesSummary, scientific=FALSE), file=spcAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
+  #i=i+1
   #toc()
   chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
   winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
@@ -146,7 +147,6 @@ for (species in uniSpecies) {
   write.table(format(chrSummary, scientific=FALSE), file=chrAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
   write.table(format(winSummary, scientific=FALSE), file=outputFileName, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T) 
 }
-write.table(format(speciesSummary, scientific=FALSE), file=spcAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
 #toc()
 
 # #Read in data
