@@ -11,7 +11,7 @@ from Bio import SeqIO
 ################################################################
 
 # docker vars
-workingDir = "./"
+workingDir = "/tmp/sppIDer/working/"
 
 parser = argparse.ArgumentParser(description="Combine desired reference genomes")
 parser.add_argument('--out', help="Output prefix, required", required=True)

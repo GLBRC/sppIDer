@@ -12,7 +12,7 @@ outputPrefix <- args[1]
 ################################################################
 
 # docker vars
-workingDir <- "./"
+workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
 bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=T)

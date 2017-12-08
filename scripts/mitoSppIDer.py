@@ -25,8 +25,8 @@ parser.add_argument('--gff', help="Key to gff file, optional")
 args = parser.parse_args()
 
 # docker vars
-scriptDir = "./"
-workingDir = "./"
+scriptDir = "/tmp/sppIDer/"
+workingDir = "/tmp/sppIDer/working/"
 
 outputPrefix = args.out
 ref = args.ref

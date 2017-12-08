@@ -9,7 +9,7 @@ import sys, re, time
 ################################################################
 
 # docker vars
-workingDir = "./"
+workingDir = "/tmp/sppIDer/working/"
 
 inputName = sys.argv[1]
 samName = inputName+".sam"

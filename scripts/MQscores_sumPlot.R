@@ -13,7 +13,7 @@ strainName <- args[1]
 ################################################################
 
 # docker vars
-workingDir <- "./"
+workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data and determine species
 summaryOutputName <- paste(workingDir, strainName, "_MQsummary.txt", sep="")

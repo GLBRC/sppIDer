@@ -18,7 +18,7 @@ print(strainName)
 ################################################################
 
 # docker vars
-workingDir <- "./"
+workingDir <- "/tmp/sppIDer/working/"
 
 spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth_newTest-d.txt", sep="")
 chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth_newTest-d.txt", sep="")
