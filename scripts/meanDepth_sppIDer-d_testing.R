@@ -53,8 +53,10 @@ chrCumLen <- 0
 #tic("Whole loop")
 for (species in uniSpecies) {
   spcChrLens <- chrLens[which(chrLens$species==species),]
-  speciesData <- fread(paste("grep", species, dataFileName, sep=" "), col.names = c("chrom", "chromPos", "value"))
-  print(species)
+  readIn <- paste("grep", species, dataFileName, sep=" ")
+  print(readIn)
+  speciesData <- fread(readIn, col.names = c("chrom", "chromPos", "value"))
+  #print(species)
   dataUniChr <- unique(speciesData$chrom)
   missingChr <- setdiff(spcChrLens$chrom, dataUniChr)
   #tic("Add missing data")
