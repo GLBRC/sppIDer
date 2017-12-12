@@ -7,6 +7,7 @@ suppressMessages(require("data.table"))
 args <- commandArgs(TRUE)
 strainName <- args[1]
 print(strainName)
+print("Grep test")
 
 #suppressMessages(require("tictoc"))
 ################################################################
