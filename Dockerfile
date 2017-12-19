@@ -76,9 +76,10 @@ RUN cd /tmp && \
 
 ### R 
 # install needed packages
-RUN R --vanilla -e 'install.packages("doBy", dependencies=TRUE, repos="http://cran.us.r-project.org")' && \
-    R --vanilla -e 'install.packages("dplyr", dependencies=TRUE, repos="http://cran.us.r-project.org")' && \
-    R --vanilla -e 'install.packages("ggplot2", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("data.table", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("doBy", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("dplyr", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("ggplot2", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 
 
 ### python 2.7 
