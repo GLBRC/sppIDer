@@ -79,7 +79,7 @@ if args.r2:
 else:
     print("Read1=" + read1Name)
     subprocess.call(["bwa", "mem", refGen, read1Name], stdout=bwaOutFile, cwd=workingDir)
-bewOutFile.close()
+bwaOutFile.close()
 print("BWA complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
