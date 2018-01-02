@@ -61,7 +61,7 @@ trackerOut.write("ref = " + ref + "\n")
 
 ########################## BWA ###########################
 bwaOutName = outputPrefix + ".sam"
-bwaOutFile = open(workingDir + bwaOutName), 'w')
+bwaOutFile = open(workingDir + bwaOutName, 'w')
 if args.r2:
     print("Read1 = " + read1Name + "\nRead2=" + read2Name)
     trackerOut.write("read1 = " + read1Name + "\n")
