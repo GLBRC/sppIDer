@@ -183,40 +183,40 @@ An optional --gff can be used if you are providing a combined gff of the regions
   output\_mitoSppIDerRun.info – human readable file tracking the time of each step.  
    
 *bwa mem*  
-    Inputs: mito reference genome, fastq sequence files, gff  
-    Output: output.sam - Human readable output of where reads map to reference   
+        Inputs: mito reference genome, fastq sequence files, gff  
+        Output: output.sam - Human readable output of where reads map to reference   
   
 *parseSamFile.py*  
-    Inputs: output.sam
-    Outputs: output\_MQ.txt - Text file of read counts by Species and Mapping Quality score  
+        Inputs: output.sam  
+        Outputs: output\_MQ.txt - Text file of read counts by Species and Mapping Quality score  
   
 *MQscores_sumPlot.R*  
-    Inputs: output\_MQ.txt  
-    Outputs:  
-        output\_MQsummary.txt - Text file with summary of how many and how well reads map to each genome  
-        output\_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome  
+        Inputs: output\_MQ.txt  
+        Outputs:  
+            output\_MQsummary.txt - Text file with summary of how many and how well reads map to each genome  
+            output\_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome  
    
 *samtools view*  
-    Inputs: output.sam  
-    Outputs: output.view.bam - Binary file of just reads with mapping quality >3  
+        Inputs: output.sam  
+        Outputs: output.view.bam - Binary file of just reads with mapping quality >3  
   
 *samtools sort*  
-    Inputs: output.sam  
-    Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
+        Inputs: output.sam  
+        Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
   
 *bedtools genomeCoverageBed*  
-    Inputs: output.sort.bam  
-    Outputs: output-d.bedgraph - Coverage of reference genome, per base pair position (d)  
+        Inputs: output.sort.bam  
+        Outputs: output-d.bedgraph - Coverage of reference genome, per base pair position (d)  
    
 *meanDepth_sppIDer-d.R*  
-    Inputs: output-d.bedgraph  
-    Outputs:  
-        output\_speciesAvgDepth-d.txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage  
-        output\_chrAvgDepth-d.txt - Text file summary of coverage for each chromosome of each species  
-        output\_winAvgDepth-d.txt - Text file summary of coverage of the genome split into 10,000 windows  
+        Inputs: output-d.bedgraph  
+        Outputs:  
+            output\_speciesAvgDepth-d.txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage  
+            output\_chrAvgDepth-d.txt - Text file summary of coverage for each chromosome of each species  
+            output\_winAvgDepth-d.txt - Text file summary of coverage of the genome split into 10,000 windows  
   
 *mitoSppIDer_depthPlot-d.R*  
-    Inputs:  
-        output\_winAvgDepth-d.txt  
-        combine.gff  
-    Outputs: output\_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows
+        Inputs:  
+            output\_winAvgDepth-d.txt  
+            combine.gff  
+        Outputs: output\_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows
