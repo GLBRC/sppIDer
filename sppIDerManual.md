@@ -74,53 +74,51 @@ glbrc/sppider \
 An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.  
 
 
-### Steps and Outputs:   
-
+### Steps and Outputs:  
 
 - output\_sppIDerRun.info – human readable file tracking the time of each step.    
 
-*bwa mem*    
-  Inputs: reference genome, fastq sequence files  
-  Output: output.sam - Human readable output of where reads map to reference 
+*bwa mem*  
+- Inputs: reference genome, fastq sequence files  
+- Output: output.sam - Human readable output of where reads map to reference 
 
 
 *parseSamFile.py*  
-  Inputs: output.sam  
-  Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
-
+- Inputs: output.sam  
+- Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
 
 *MQscores_sumPlot.R*  
-  Inputs: output\_MQ.txt   
-  Outputs:   
+- Inputs: output\_MQ.txt   
+- Outputs:   
    + output\_MQsummary.txt - Text file with summary of how many and how well reads map to each genome  
    + output\_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome   
    
 *samtools view*    
-  Inputs: output.sam    
-  Outputs: output.view.bam - Binary file of just reads with mapping quality >3    
+- Inputs: output.sam    
+- Outputs: output.view.bam - Binary file of just reads with mapping quality >3    
 
 *samtools sort*  
-  Inputs: output.sam  
-  Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
+- Inputs: output.sam  
+- Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
   
 *bedtools genomeCoverageBed*  
-  Inputs: output.sort.bam  
-  Outputs: output-(d/g).bedgraph - Coverage of reference genome, per base pair position (d) or grouped by coverage (g)  
+- Inputs: output.sort.bam  
+- Outputs: output-(d/g).bedgraph - Coverage of reference genome, per base pair position (d) or grouped by coverage (g)  
   
 *meanDepth_sppIDer(-d/-bga).R*  
-  Inputs: output-(d/g).bedgraph  
-  Outputs:  
+- Inputs: output-(d/g).bedgraph  
+- Outputs:  
    - output\_speciesAvgDepth-(d/g).txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage  
    - output\_chrAvgDepth-(d/g).txt - Text file summary of coverage for each chromosome of each species  
    - output\_winAvgDepth-(d/g).txt - Text file summary of coverage of the genome split into 10,000 windows  
    
 *sppIDer_depthPlot_forSpc.R*  
-  Inputs: output\_speciesAvgDepth-(d/g).txt  
-  Outputs: output\_speciesDepth.pdf - Plot of coverage by species  
+- Inputs: output\_speciesAvgDepth-(d/g).txt  
+- Outputs: output\_speciesDepth.pdf - Plot of coverage by species  
   
 *sppIDer_depthPlot-d.R*  
-  Inputs: output\_winAvgDepth-(d/g).txt
-  Outputs: output\_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows  
+- Inputs: output\_winAvgDepth-(d/g).txt
+- Outputs: output\_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows  
      
 ---
      
