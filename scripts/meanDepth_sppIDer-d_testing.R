@@ -74,18 +74,17 @@ for (species in uniSpecies) {
   #toc()
   #tic("Split")
   split <- strsplit(as.character(speciesData$chrom), "-")
-  speciesData$species <- unlist(lapply(split, function(x) x[1]))
+  #speciesData$species <- unlist(lapply(split, function(x) x[1]))
   speciesData$chr <- as.numeric(unlist(lapply(split, function(x) x[2])))
   #toc()
   #tic("Species Summary")
-  speciesDataOrdered <- speciesData[order(speciesData$chr),]
   spcLen <- sum(spcChrLens$length)
   speciesSummary[1,1] <- spcCumLen
   speciesSummary[1,2] <- species
   speciesSummary[1,3] <- spcLen
   speciesSummary[1,4] <- mean(speciesData$value)
   speciesSummary[1,6] <- max(speciesData$value, na.rm=T)
-  log2 <- log2(mean(speciesData$value/spcLen)/totalMean)
+  log2 <- log2(mean(speciesData$value)/totalMean)
   if (log2<0) {
     log2 <- 0
   } else if (is.infinite(log2)) {
@@ -99,26 +98,29 @@ for (species in uniSpecies) {
   #toc()
   chrSummary <-data.frame(Genome_Pos=numeric(), chrom=character(), chrLen=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(),stringsAsFactors = FALSE)
   winSummary <-data.frame(Genome_Pos=numeric(), species=character(), chrom=character(), winStart=numeric(), winEnd=numeric(), meanValue=numeric(), log2mean=numeric(), max=numeric(), median=numeric(), stringsAsFactors = FALSE)
-  j=1
-  m=1
+  #j=1
+  #m=1
+  speciesDataOrdered <- speciesData[order(speciesData$chr),]
+  rm(speciesData)
   chrData <- splitBy("chr", speciesDataOrdered)
   for (k in 1:length(chrData)){
     #tic("Chr Summary")
     #print(as.character(chrData[[k]]$chrom[1]))
     chrLen <- length(chrData[[k]]$chrom)
-    chrSummary[j,1] <- chrCumLen
-    chrSummary[j,2] <- as.character(chrData[[k]]$chrom[1])
-    chrSummary[j,3] <- chrLen
-    chrSummary[j,4] <- mean(chrData[[k]]$value)
-    chrSummary[j,6] <- max(chrData[[k]]$value, na.rm=T)
+    chrSummary[1,1] <- chrCumLen
+    chrSummary[1,2] <- as.character(chrData[[k]]$chrom[1])
+    chrSummary[1,3] <- chrLen
+    chrSummary[1,4] <- mean(chrData[[k]]$value)
+    chrSummary[1,6] <- max(chrData[[k]]$value, na.rm=T)
     log2 <- log2(mean(chrData[[k]]$value)/totalMean)
     if (log2<0) {
       log2 <- 0
     } else if (is.infinite(log2)) {
       log2 <- 0
     }
-    chrSummary[j,5] <- log2
-    chrSummary[j,7] <- median(chrData[[k]]$value)
+    chrSummary[1,5] <- log2
+    chrSummary[1,7] <- median(chrData[[k]]$value)
+    write.table(format(chrSummary, scientific=FALSE), file=chrAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
     #toc()
     oneChrData <- chrData[[k]]
     oneChrData$Genome_Pos <- oneChrData$chromPos + chrCumLen
@@ -129,29 +131,31 @@ for (species in uniSpecies) {
     winData <- splitBy("bin", oneChrData)
     for (n in 1:length(winData)){
       winLen <- sum(as.numeric(winData[[n]]$regionLen))
-      winSummary[m,1] <- winData[[n]]$Genome_Pos[1]
-      winSummary[m,2] <- winData[[n]]$species[1]
-      winSummary[m,3] <- as.character(winData[[n]]$chrom[1])
-      winSummary[m,4] <- winData[[n]]$chromPos[1]
-      winSummary[m,5] <- winData[[n]]$chromPos[nrow(winData[[n]])]
-      winSummary[m,6] <- mean(winData[[n]]$value)
+      winSummary[1,1] <- winData[[n]]$Genome_Pos[1]
+      winSummary[1,2] <- species
+      winSummary[1,3] <- as.character(winData[[n]]$chrom[1])
+      winSummary[1,4] <- winData[[n]]$chromPos[1]
+      winSummary[1,5] <- winData[[n]]$chromPos[nrow(winData[[n]])]
+      winSummary[1,6] <- mean(winData[[n]]$value)
       log2 <- log2(mean(winData[[n]]$value)/totalMean)
       if (log2<0) {
         log2 <- 0
       } else if (is.infinite(log2)) {
         log2 <- 0
       }
-      winSummary[m,7] <- log2
-      winSummary[m,8] <- max(winData[[n]]$value, na.rm=T)
-      winSummary[m,9] <- median(winData[[n]]$value)
-      m <- m+1
+      winSummary[1,7] <- log2
+      winSummary[1,8] <- max(winData[[n]]$value, na.rm=T)
+      winSummary[1,9] <- median(winData[[n]]$value)
+      write.table(format(winSummary, scientific=FALSE), file=outputFileName, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
+      #m <- m+1
     }
     #toc()
     chrCumLen = chrCumLen + chrLen
-    j = j+1
+    #j = j+1
   }
-  write.table(format(chrSummary, scientific=FALSE), file=chrAvgFile, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T)
-  write.table(format(winSummary, scientific=FALSE), file=outputFileName, col.names = F, row.names=F, sep = "\t", quote = FALSE, append=T) 
+  rm(chrData)
+  rm(oneChrData)
+  rm(speciesDataOrdered)
 }
 #toc()
 
