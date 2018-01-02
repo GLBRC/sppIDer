@@ -45,7 +45,9 @@ The KEY.txt file must be tab delimited and the reference genome unique name cann
    1. Combined reference genome produced by combineRefGenomes.py
    2. fastq(s) of interest to test  
 
-### Example: executing a sppIDer.py
+### Example: executing sppIDer.py
+
+
 ``` docker run \
 --rm -it \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
