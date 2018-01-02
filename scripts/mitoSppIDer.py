@@ -1,6 +1,6 @@
 __author__ = 'Quinn'
 
-import sys, re, subprocess, time, argparse
+import argparse, multiprocessing, sys, re, subprocess, time
 
 ###############################################################
 # This script runs the mitoSppIDer pipeline. Which is meant for mapping short read data to a combined genome of just mitochondiral genomes (or other small genomes)
@@ -27,6 +27,7 @@ args = parser.parse_args()
 # docker vars
 scriptDir = "/tmp/sppIDer/"
 workingDir = "/tmp/sppIDer/working/"
+numCores = str(multiprocessing.cpu_count())
 
 outputPrefix = args.out
 ref = args.ref
@@ -68,7 +69,7 @@ if args.r2:
     if args.gff:
         trackerOut.write("gff = " + args.gff + "\n")
     trackerOut.close()
-    subprocess.call(["bwa", "mem", ref, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
+    subprocess.call(["bwa", "mem", "-t", numCores, ref, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
 else:
     read1Name = args.r1
     print("Read1="+read1Name)
@@ -76,7 +77,7 @@ else:
     if args.gff:
         trackerOut.write("gff=" + args.gff + "\n")
     trackerOut.close()
-    subprocess.call(["bwa", "mem", ref, read1Name], stdout=bwaOutFile, cwd=workingDir)
+    subprocess.call(["bwa", "mem", "-t", numCores, ref, read1Name], stdout=bwaOutFile, cwd=workingDir)
 print("BWA complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -89,8 +90,8 @@ trackerOut.close()
 samViewOutQual = outputPrefix + ".view.bam"
 bamSortOut = outputPrefix + ".sort.bam"
 samViewQualFile = open(workingDir + samViewOutQual, 'w')
-subprocess.call(["samtools", "view", "-q", "1", "-bhSu",  bwaOutName], stdout=samViewQualFile, cwd=workingDir)
-subprocess.call(["samtools", "sort", samViewOutQual, "-o", bamSortOut], cwd=workingDir)
+subprocess.call(["samtools", "view", "-@", numCores, "-q", "1", "-bhSu",  bwaOutName], stdout=samViewQualFile, cwd=workingDir)
+subprocess.call(["samtools", "sort", "-@", numCores, samViewOutQual, "-o", bamSortOut], cwd=workingDir)
 print("SAMTOOLS complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)

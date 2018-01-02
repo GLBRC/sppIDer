@@ -20,12 +20,18 @@ workingDir <- "/tmp/sppIDer/working/"
 bedData.wWholeGenome <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
 bedData <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
 completeChromList <- unlist(list(unique(bedData$species)))
+## INLINE TESTS
+#print ("============== length(completeChromList)")
+#print (length(completeChromList))
 output <- data.frame()
 
 species <- c()
 #Split chr name from spcecies name
 for (i in 1:length(completeChromList)) {
   completeChrString <- toString(completeChromList[[i]])
+  ## INLINE TESTS
+  #print ('============== completeChrString')
+  #print (completeChrString)
   split <- unlist(strsplit(completeChrString, "-"))
   species <- c(species, split[1])
 }
