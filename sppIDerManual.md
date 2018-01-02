@@ -8,8 +8,12 @@
    1. Tab separated text file key to reference genomes to combine.  
    2. Each of those reference genomes as fastas, e.g.:  
 	   + S288c.fasta  
-	   + GCA_002079055.1.fasta   
+	   + GCA_002079055.1.fasta  
+
+
 ### Example: executing a combineRefGenome.py
+
+
 ``` 
 docker run \
 --rm -it \
