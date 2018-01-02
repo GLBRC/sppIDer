@@ -183,8 +183,8 @@ An optional --gff can be used if you are providing a combined gff of the regions
   output\_mitoSppIDerRun.info – human readable file tracking the time of each step.  
    
 *bwa mem*  
-        Inputs: mito reference genome, fastq sequence files, gff  
-        Output: output.sam - Human readable output of where reads map to reference   
+       Inputs: mito reference genome, fastq sequence files, gff  
+       Output: output.sam - Human readable output of where reads map to reference   
   
 *parseSamFile.py*  
         Inputs: output.sam  
