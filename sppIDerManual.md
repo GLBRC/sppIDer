@@ -24,16 +24,16 @@ An optional --trim can be used to trim short uninformative contigs for reference
 The KEY.txt file must be tab delimited and the reference genome unique name cannot contain hyphens. See example.
 
 ### Outputs:
-####   For downstream use:  
-         * REF.fasta
-         * REF.fasta.bwt
-         * REF.fasta.pac
-         * REF.fasta.ann
-         * REF.fasta.amb
-         * REF.fasta.sa
-         * REF.fasta.fai
+####   For downstream use: 
+   -REF.fasta
+   -REF.fasta.bwt
+   -REF.fasta.pac
+   -REF.fasta.ann
+   -REF.fasta.amb
+   -REF.fasta.sa
+   -REF.fasta.fai
 ####   For humans:  
-         * comboLength_REF.fasta.txt - text file with summary of the length of each chromosome, species reference, and total combination genome.
+   -comboLength_REF.fasta.txt - text file with summary of the length of each chromosome, species reference, and total combination genome.
 
 ---        
 ## sppIDer.py
@@ -45,7 +45,7 @@ The KEY.txt file must be tab delimited and the reference genome unique name cann
    1. Combined reference genome produced by combineRefGenomes.py
    2. fastq(s) of interest to test  
 
-### Example: executing a combineRefGenome.py
+### Example: executing a sppIDer.py
 ``` docker run \
 --rm -it \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
@@ -57,10 +57,11 @@ glbrc/sppider \
   --r1 R1.fastq \
   --r2 R2.fastq
 ```  
+ 
 An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.
 
 ### Steps and Outputs: 
-     output\_sppIDerRun.info – human readable file tracking the time of each step.  
+   output\_sppIDerRun.info – human readable file tracking the time of each step.  
 *bwa mem*
      Inputs: reference genome, fastq sequence files
      Output: output.sam - Human readable output of where reads map to reference 
@@ -92,8 +93,9 @@ An optional --byGroup flag can be used for very large combination genomes. This 
      Outputs: output_speciesDepth.pdf - Plot of coverage by species
 *sppIDer_depthPlot-d.R*
      Inputs: output_winAvgDepth-(d/g).txt
-     Outputs: output_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows
-
+     Outputs: output_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows  
+     
+     
 # mitoSppIDer
 
 For mitoSppIDer the combineRefGenomes.py scripts again must be run just for mitochondrial genomes desired. Additionally, regions of interested, e.g. coding regions, can be highlighted on the final output if the combineGFF.py script is also run.   
@@ -104,10 +106,11 @@ For mitoSppIDer the combineRefGenomes.py scripts again must be run just for mito
 ### Inputs:
    1. Tab separated text file key to reference genomes to combine.
    2. Each of those reference genome gffs, e.g.:
-	   + S288c.gff
-	   + GCA_002079055.1.gff
+	   S288c.gff
+	   GCA_002079055.1.gff
 	   
 ### Example: executing a combineRefGenome.py  
+
 ```
 docker run \
 --rm -it \
@@ -117,7 +120,8 @@ glbrc/sppider \
   combineGFF.py
   --out REF.gff \ 
   --key GFF_KEY.txt 
-```	         
+```  
+	         
 
 ### Outputs:  
      combinedRef.gff - a tab delimited text file that specifies the species, start, end, midpoint, and geneName for each intron to be delineated in the final plots.
