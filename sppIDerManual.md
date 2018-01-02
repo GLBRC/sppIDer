@@ -23,24 +23,28 @@ glbrc/sppider \
   combineRefGenomes.py
   --out REF.fasta \ 
   --key KEY.txt
+
 ```  
+
 An optional --trim can be used to trim short uninformative contigs for reference genomes with many short contigs. All contigs shorter than the supplied interger will be ignored.
 The KEY.txt file must be tab delimited and the reference genome unique name cannot contain hyphens. See example.
 
-### Outputs:
-####   For downstream use: 
-   -REF.fasta
-   -REF.fasta.bwt
-   -REF.fasta.pac
-   -REF.fasta.ann
-   -REF.fasta.amb
-   -REF.fasta.sa
-   -REF.fasta.fai  
+### Outputs:  
 
-####   For humans:  
-   -comboLength_REF.fasta.txt - text file with summary of the length of each chromosome, species reference, and total combination genome.
+####   For downstream use:  
+  - REF.fasta  
+  - REF.fasta.bwt  
+  - REF.fasta.pac  
+  - REF.fasta.ann  
+  - REF.fasta.amb  
+  - REF.fasta.sa  
+  - REF.fasta.fai  
 
----        
+####   For humans:    
+  - comboLength_REF.fasta.txt - text file with summary of the length of each chromosome, species reference, and total combination genome.
+
+---    
+    
 ## sppIDer.py
    This script requires the combination reference genome made with combineGenomes.py and fastq formatted short-read sequence files for the test of interest. Additionally, you can choose to run it so that depth is analyzed by basepair (-byBP) or grouped by coverage (-byGroup). This script will create a file (output\_sppIDerRun.info) that will print all the argument choice and the time to run each step. Additionally, all the normal standard outputs for each step will be printed to screen along with the time to run each step.  
    This script will then run bwa –mem to map the reads to the combination reference genome and outputs a sam file. This same file is then passed to a custom python script (parseSamFile.py) to parse the data by which genome the reads map to and the mapping quality (MQ) the output of this is passed a Rscript (MQscores\_sumPlot.R) that will plot the percentage of reads that map to each genome and unmapped reads, the same plot without the unmapped bar, for those datasets where most the reads don’t map, and a violin plot showing the distribution of mapping qualities for each genome.  
@@ -53,8 +57,7 @@ The KEY.txt file must be tab delimited and the reference genome unique name cann
 
 ### Example: executing sppIDer.py
 
-
-``` 
+```  
 docker run \
 --rm -it \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
@@ -64,20 +67,28 @@ glbrc/sppider \
   --out OUT \
   --ref REF.fasta \
   --r1 R1.fastq \
-  --r2 R2.fastq
+  --r2 R2.fastq  
+
 ```  
 
- 
 An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.
 
 ### Steps and Outputs: 
+
+
    output\_sppIDerRun.info – human readable file tracking the time of each step.  
+
+
 *bwa mem*
      Inputs: reference genome, fastq sequence files
      Output: output.sam - Human readable output of where reads map to reference 
+
+
 *parseSamFile.py*
      Inputs: output.sam
      Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
+
+
 *MQscores_sumPlot.R*
      Inputs: output_MQ.txt 
      Outputs: 
