@@ -7,8 +7,8 @@
 ### Inputs:  
    1. Tab separated text file key to reference genomes to combine.  
    2. Each of those reference genomes as fastas, e.g.:  
-	   + S288c.fasta  
-	   + GCA_002079055.1.fasta  
+   - S288c.fasta  
+   - GCA_002079055.1.fasta  
 
 
 ### Example: executing a combineRefGenome.py
@@ -79,58 +79,65 @@ An optional --byGroup flag can be used for very large combination genomes. This 
    output\_sppIDerRun.info – human readable file tracking the time of each step.  
 
 
-*bwa mem*
-     Inputs: reference genome, fastq sequence files
-     Output: output.sam - Human readable output of where reads map to reference 
+*bwa mem*  
+  Inputs: reference genome, fastq sequence files  
+  Output: output.sam - Human readable output of where reads map to reference 
 
 
-*parseSamFile.py*
-     Inputs: output.sam
-     Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
+*parseSamFile.py*  
+  Inputs: output.sam  
+  Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
 
 
-*MQscores_sumPlot.R*
-     Inputs: output_MQ.txt 
-     Outputs: 
-          +output_MQsummary.txt - Text file with summary of how many and how well reads map to each genome
-          +output_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome
-*samtools view*
-     Inputs: output.sam
-     Outputs: output.view.bam - Binary file of just reads with mapping quality >3
-*samtools sort*
-     Inputs: output.sam
-     Oputputs: output.sort.bam - Binary file of reads ordered by reference genome
-*bedtools genomeCoverageBed*
-     Inputs: output.sort.bam
-     Outputs: output-(d/g).bedgraph - Coverage of reference genome, per base pair position (d) or grouped by coverage (g)
-*meanDepth_sppIDer(-d/-bga).R*
-     Inputs: output-(d/g).bedgraph 
-     Outputs: 
-          -output_speciesAvgDepth-(d/g).txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage
-          -output_chrAvgDepth-(d/g).txt - Text file summary of coverage for each chromosome of each species
-          -output_winAvgDepth-(d/g).txt - Text file summary of coverage of the genome split into 10,000 windows
-*sppIDer_depthPlot_forSpc.R*
-     Inputs: output_speciesAvgDepth-(d/g).txt
-     Outputs: output_speciesDepth.pdf - Plot of coverage by species
-*sppIDer_depthPlot-d.R*
-     Inputs: output_winAvgDepth-(d/g).txt
-     Outputs: output_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows  
-     
-     
-# mitoSppIDer
-
-For mitoSppIDer the combineRefGenomes.py scripts again must be run just for mitochondrial genomes desired. Additionally, regions of interested, e.g. coding regions, can be highlighted on the final output if the combineGFF.py script is also run.   
-
-## combineGFF.py  
-   This script combines gff style files that include information of the regions desired to be highlighted on the final plot. See examples. The key should be a text file with a list of the “desired reference gff name” and the actual reference gff separated by a tab.  
+*MQscores_sumPlot.R*  
+  Inputs: output\_MQ.txt   
+  Outputs:   
+   + output\_MQsummary.txt - Text file with summary of how many and how well reads map to each genome  
+   + output\_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome   
    
-### Inputs:
-   1. Tab separated text file key to reference genomes to combine.
-   2. Each of those reference genome gffs, e.g.:
-	   S288c.gff
-	   GCA_002079055.1.gff
+*samtools view*    
+  Inputs: output.sam    
+  Outputs: output.view.bam - Binary file of just reads with mapping quality >3    
+
+*samtools sort*  
+  Inputs: output.sam  
+  Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
+  
+*bedtools genomeCoverageBed*  
+  Inputs: output.sort.bam  
+  Outputs: output-(d/g).bedgraph - Coverage of reference genome, per base pair position (d) or grouped by coverage (g)  
+  
+*meanDepth_sppIDer(-d/-bga).R*  
+  Inputs: output-(d/g).bedgraph  
+  Outputs:  
+   - output\_speciesAvgDepth-(d/g).txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage  
+   - output\_chrAvgDepth-(d/g).txt - Text file summary of coverage for each chromosome of each species  
+   - output\_winAvgDepth-(d/g).txt - Text file summary of coverage of the genome split into 10,000 windows  
+   
+*sppIDer_depthPlot_forSpc.R*  
+  Inputs: output\_speciesAvgDepth-(d/g).txt  
+  Outputs: output\_speciesDepth.pdf - Plot of coverage by species  
+  
+*sppIDer_depthPlot-d.R*  
+  Inputs: output\_winAvgDepth-(d/g).txt
+  Outputs: output\_sppIDerDepthPlot-(d/g).pdf - Plot of coverage by genome split into 10,000 windows  
+     
+---
+     
+# mitoSppIDer  
+
+For mitoSppIDer the combineRefGenomes.py scripts again must be run just for mitochondrial genomes desired. Additionally, regions of interested, e.g. coding regions, can be highlighted on the final output if the combineGFF.py script is also run.     
+
+## combineGFF.py   
+   This script combines gff style files that include information of the regions desired to be highlighted on the final plot. See examples. The key should be a text file with a list of the “desired reference gff name” and the actual reference gff separated by a tab.    
+   
+### Inputs:  
+   1. Tab separated text file key to reference genomes to combine.  
+   2. Each of those reference genome gffs, e.g.:  
+      S288c.gff  
+      GCA_002079055.1.gff  
 	   
-### Example: executing a combineRefGenome.py  
+### Example: executing a combineRefGenome.py    
 
 ```
 docker run \
@@ -140,22 +147,23 @@ docker run \
 glbrc/sppider \
   combineGFF.py
   --out REF.gff \ 
-  --key GFF_KEY.txt 
-```  
-	         
-
-### Outputs:  
-     combinedRef.gff - a tab delimited text file that specifies the species, start, end, midpoint, and geneName for each intron to be delineated in the final plots.
-     
-## mitoSppIDer.py  
-   This pipeline is very similar to the main sppIDer.py only the input reference genomes only contains mitochondrial (mito) or other small genomes. Because of the size of most mito genomes the by-base-pair is the default. The final plots will be stacked plots of each supplied mito genome and if a combined gff is supplied then those regions will be labeled and shaded on the final plot. 
+  --key GFF_KEY.txt
    
-### Inputs:
-   1. Combined reference genome of just mitochondrial genomes made with combineRefGenome.py
-   2. Combined gff style file for adding emphasis in plots, if desired.   
-   3. fastq(s) of interest to test
+```    
+	         
+### Outputs:    
+   combinedRef.gff - a tab delimited text file that specifies the species, start, end, midpoint, and geneName for each intron to be delineated in the final plots.  
      
-### Example: executing a mitoSppIDer.py pipeline
+## mitoSppIDer.py    
+   This pipeline is very similar to the main sppIDer.py only the input reference genomes only contains mitochondrial (mito) or other small genomes. Because of the size of most mito genomes the by-base-pair is the default. The final plots will be stacked plots of each supplied mito genome and if a combined gff is supplied then those regions will be labeled and shaded on the final plot.   
+   
+### Inputs:  
+   1. Combined reference genome of just mitochondrial genomes made with combineRefGenome.py  
+   2. Combined gff style file for adding emphasis in plots, if desired.     
+   3. fastq(s) of interest to test  
+     
+### Example: executing a mitoSppIDer.py pipeline  
+
 ```
 docker run \
 --rm -it \
@@ -168,38 +176,47 @@ glbrc/sppider \
   --r1 R1.fastq \
   --r2 R2.fastq
 ```  
+  
 An optional --gff can be used if you are providing a combined gff of the regions that should be marked on the final plots.
 
-### Steps and Outputs: 
-     output_mitoSppIDerRun.info – human readable file tracking the time of each step. 
-*bwa mem*
-     Inputs: mito reference genome, fastq sequence files, gff
-     Output: output.sam - Human readable output of where reads map to reference 
-*parseSamFile.py*
-     Inputs: output.sam
-     Outputs: output_MQ.txt - Text file of read counts by Species and Mapping Quality score
-*MQscores_sumPlot.R*
-     Inputs: output_MQ.txt 
-     Outputs: 
-          -output_MQsummary.txt - Text file with summary of how many and how well reads map to each genome
-          -output_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome
-*samtools view*
-     Inputs: output.sam
-     Outputs: output.view.bam - Binary file of just reads with mapping quality >3
-*samtools sort*
-     Inputs: output.sam
-     Oputputs: output.sort.bam - Binary file of reads ordered by reference genome
-*bedtools genomeCoverageBed*
-     Inputs: output.sort.bam
-     Outputs: output-d.bedgraph - Coverage of reference genome, per base pair position (d) 
-*meanDepth_sppIDer-d.R*
-    Inputs: output-d.bedgraph 
-    Outputs: 
-        -output_speciesAvgDepth-d.txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage
-        -output_chrAvgDepth-d.txt - Text file summary of coverage for each chromosome of each species
-        -output_winAvgDepth-d.txt - Text file summary of coverage of the genome split into 10,000 windows
-*mitoSppIDer_depthPlot-d.R*
-    Inputs: 
-        -output_winAvgDepth-d.txt
-	    -combine.gff
-    Outputs: output_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows
+### Steps and Outputs:    
+  output\_mitoSppIDerRun.info – human readable file tracking the time of each step.  
+   
+*bwa mem*  
+  Inputs: mito reference genome, fastq sequence files, gff  
+  Output: output.sam - Human readable output of where reads map to reference   
+  
+*parseSamFile.py*  
+  Inputs: output.sam
+  Outputs: output\_MQ.txt - Text file of read counts by Species and Mapping Quality score  
+  
+*MQscores_sumPlot.R*  
+  Inputs: output\_MQ.txt  
+  Outputs:  
+   - output\_MQsummary.txt - Text file with summary of how many and how well reads map to each genome  
+   - output\_plotMQ.pdf - Plot of reads mapped per genome and Mapping Quality per genome  
+   
+*samtools view*  
+  Inputs: output.sam  
+  Outputs: output.view.bam - Binary file of just reads with mapping quality >3  
+  
+*samtools sort*  
+  Inputs: output.sam  
+  Oputputs: output.sort.bam - Binary file of reads ordered by reference genome  
+  
+*bedtools genomeCoverageBed*  
+  Inputs: output.sort.bam  
+  Outputs: output-d.bedgraph - Coverage of reference genome, per base pair position (d)  
+   
+*meanDepth_sppIDer-d.R*  
+  Inputs: output-d.bedgraph  
+  Outputs:  
+  - output\_speciesAvgDepth-d.txt - Text file summary of coverage for each species including: mean, relativeMean (speciesMean/globalMean), max, and median coverage  
+  - output\_chrAvgDepth-d.txt - Text file summary of coverage for each chromosome of each species  
+  - output\_winAvgDepth-d.txt - Text file summary of coverage of the genome split into 10,000 windows  
+  
+*mitoSppIDer_depthPlot-d.R*  
+  Inputs:  
+  - output\_winAvgDepth-d.txt  
+  - combine.gff  
+  Outputs: output\_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows
