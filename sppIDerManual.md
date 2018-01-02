@@ -35,7 +35,8 @@ The KEY.txt file must be tab delimited and the reference genome unique name cann
    -REF.fasta.ann
    -REF.fasta.amb
    -REF.fasta.sa
-   -REF.fasta.fai
+   -REF.fasta.fai  
+
 ####   For humans:  
    -comboLength_REF.fasta.txt - text file with summary of the length of each chromosome, species reference, and total combination genome.
 
@@ -49,10 +50,12 @@ The KEY.txt file must be tab delimited and the reference genome unique name cann
    1. Combined reference genome produced by combineRefGenomes.py
    2. fastq(s) of interest to test  
 
+
 ### Example: executing sppIDer.py
 
 
-``` docker run \
+``` 
+docker run \
 --rm -it \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
 --user "$UID:$(id -g $USERNAME)" \
@@ -63,6 +66,7 @@ glbrc/sppider \
   --r1 R1.fastq \
   --r2 R2.fastq
 ```  
+
  
 An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.
 
