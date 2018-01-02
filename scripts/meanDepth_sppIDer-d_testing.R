@@ -6,8 +6,10 @@ suppressMessages(require("doBy"))
 suppressMessages(require("data.table"))
 args <- commandArgs(TRUE)
 strainName <- args[1]
-print(strainName)
-print("Grep test")
+
+## INLINE TESTS
+#print(strainName)
+#print("Grep test")
 
 #suppressMessages(require("tictoc"))
 ################################################################
@@ -21,9 +23,9 @@ print("Grep test")
 # docker vars
 workingDir <- "/tmp/sppIDer/working/"
 
-spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth_newTest-d.txt", sep="")
-chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth_newTest-d.txt", sep="")
-outputFileName <- paste(workingDir, strainName, "_winAvgDepth_newTest-d.txt", sep="")
+spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-d.txt", sep="")
+chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-d.txt", sep="")
+outputFileName <- paste(workingDir, strainName, "_winAvgDepth-d.txt", sep="")
 dataFileName <- paste(workingDir, strainName, "-d.bedgraph", sep="")
 
 chrLens <- read.table(paste(workingDir, strainName, "_chrLens.txt", sep=""), header=F, col.names=c("chrom", "length"))
@@ -54,9 +56,10 @@ chrCumLen <- 0
 #tic("Whole loop")
 for (species in uniSpecies) {
   spcChrLens <- chrLens[which(chrLens$species==species),]
-  readIn <- paste("grep", species, dataFileName, sep=" ")
-  print(readIn)
-  speciesData <- fread(readIn, col.names = c("chrom", "chromPos", "value"))
+
+  # pipe the result of "awk {'print $1, $2, $3'} dataFileName | grep species", with supplied column names, into speciesData via read.table
+  speciesData <- read.table(pipe(paste("awk {'print $1, $2, $3'}", dataFileName, "| grep", species, sep=" ")), col.names=c("chrom", "chromPos", "value"))
+
   #print(species)
   dataUniChr <- unique(speciesData$chrom)
   missingChr <- setdiff(spcChrLens$chrom, dataUniChr)

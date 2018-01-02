@@ -1,6 +1,6 @@
 __author__ = 'Quinn'
 
-import sys, re, subprocess, time, argparse
+import argparse, multiprocessing, sys, re, subprocess, time
 
 ################################################################
 # This script runs the full sppIDer pipeline.
@@ -26,6 +26,7 @@ args = parser.parse_args()
 # docker vars
 scriptDir = "/tmp/sppIDer/"
 workingDir = "/tmp/sppIDer/working/"
+numCores = str(multiprocessing.cpu_count())
 
 outputPrefix = args.out
 refGen=args.ref
@@ -75,10 +76,10 @@ bwaOutName = outputPrefix + ".sam"
 bwaOutFile = open(workingDir + bwaOutName, 'w')
 if args.r2:
     print("Read1=" + read1Name + "\nRead2=" + read2Name)
-    subprocess.call(["bwa", "mem", refGen, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
+    subprocess.call(["bwa", "mem", "-t", numCores, refGen, read1Name, read2Name], stdout=bwaOutFile, cwd=workingDir)
 else:
     print("Read1=" + read1Name)
-    subprocess.call(["bwa", "mem", refGen, read1Name], stdout=bwaOutFile, cwd=workingDir)
+    subprocess.call(["bwa", "mem", "-t", numCores, refGen, read1Name], stdout=bwaOutFile, cwd=workingDir)
 bwaOutFile.close()
 print("BWA complete")
 currentTime = time.time()-start
@@ -92,9 +93,9 @@ trackerOut.close()
 samViewOutQual = outputPrefix + ".view.bam"
 bamSortOut = outputPrefix + ".sort.bam"
 samViewQualFile = open(workingDir + samViewOutQual, 'w')
-subprocess.call(["samtools", "view", "-q", "3", "-bhSu", bwaOutName], stdout=samViewQualFile, cwd=workingDir)
+subprocess.call(["samtools", "view", "-@", numCores, "-q", "3", "-bhSu", bwaOutName], stdout=samViewQualFile, cwd=workingDir)
 samViewQualFile.close()
-subprocess.call(["samtools", "sort", samViewOutQual, "-o", bamSortOut], cwd=workingDir)
+subprocess.call(["samtools", "sort", "-@", numCores, samViewOutQual, "-o", bamSortOut], cwd=workingDir)
 print("SAMTOOLS complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)

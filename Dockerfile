@@ -92,7 +92,7 @@ RUN cd /tmp && \
     pip install numpy
 
 
-### package sppIDer files
+### package sppIDer script files (*.R, *.py)
 RUN mkdir -p /tmp/sppIDer/working/
 ADD scripts/*.py scripts/*.R /tmp/sppIDer/
 
