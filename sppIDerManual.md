@@ -71,15 +71,15 @@ glbrc/sppider \
 
 ```  
 
-An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.
-
-### Steps and Outputs: 
+An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.  
 
 
-   output\_sppIDerRun.info – human readable file tracking the time of each step.  
+### Steps and Outputs:   
 
 
-*bwa mem*  
+- output\_sppIDerRun.info – human readable file tracking the time of each step.    
+
+*bwa mem*    
   Inputs: reference genome, fastq sequence files  
   Output: output.sam - Human readable output of where reads map to reference 
 
