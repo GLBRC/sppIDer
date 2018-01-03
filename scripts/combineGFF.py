@@ -23,7 +23,7 @@ listName = args.key
 
 outGFF = open(workingDir+comboGFFName, 'w')
 outGFF.write("Species\tStart\tEnd\tMidpoint\tName\n")
-list = open(listName, 'r')
+list = open(workingDir+listName, 'r')
 species = list.readlines()
 for spc in species:
     spc = spc.strip().split('\t')
