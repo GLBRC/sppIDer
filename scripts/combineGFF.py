@@ -23,13 +23,13 @@ listName = args.key
 
 outGFF = open(workingDir+comboGFFName, 'w')
 outGFF.write("Species\tStart\tEnd\tMidpoint\tName\n")
-list = open(listName, 'r')
+list = open(workingDir+listName, 'r')
 species = list.readlines()
 for spc in species:
     spc = spc.strip().split('\t')
     uniID = spc[0]
     gffName = spc[1]
-    spcGFF = open(gffName, 'r')
+    spcGFF = open(workingDir+gffName, 'r')
     lines = spcGFF.readlines()
     for line in lines[3:]:
         lineInfo = line.strip().split('\t')
