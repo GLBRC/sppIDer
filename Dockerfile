@@ -1,24 +1,28 @@
 ##### 
 #
 # sppIDer
-# - Quinn Langdon's sppIDer informatics pipeline
+# - Quinn Langdon's sppIDer bioinformatics pipeline
+# - https://hub.docker.com/r/glbrc/sppider/
+# - https://github.com/GLBRC/sppIDer
 #
 #####
 
 
 ### base image
 # https://hub.docker.com/_/centos/
-FROM centos:7
+FROM centos:7.4.1708
 
 
 ### install prereqs
 # epel-release is required first to install the yum repo for R
-RUN yum install -y \
+RUN yum update -y && \
+    yum install -y \
     epel-release && \
     yum install -y \
     bzip2 \
     bzip2-devel \
     cairo-devel \
+    ed \
     gcc \
     gcc-c++ \
     libcurl \
@@ -31,7 +35,9 @@ RUN yum install -y \
     R \
     wget \
     xz-devel \
-    zlib-devel
+    zlib-devel && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 
 ### samtools 1.6
@@ -70,6 +76,8 @@ RUN cd /tmp && \
 
 ### R 
 # install needed packages
+RUN R --vanilla -e 'install.packages("data.table", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("doBy", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 RUN R --vanilla -e 'install.packages("dplyr", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 RUN R --vanilla -e 'install.packages("ggplot2", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 
@@ -84,15 +92,14 @@ RUN cd /tmp && \
     pip install numpy
 
 
-### package sppIDer files
+### package sppIDer script files (*.R, *.py)
 RUN mkdir -p /tmp/sppIDer/working/
-ADD sppIDer.py /tmp/sppIDer/
-ADD scripts/*.* /tmp/sppIDer/scripts/
+ADD scripts/*.py scripts/*.R /tmp/sppIDer/
 
 
 ### execute sppIDer by default
-WORKDIR /tmp/sppIDer/working/
-ENTRYPOINT ["/usr/bin/python2.7","/tmp/sppIDer/sppIDer.py"]
-CMD ["$@"]
+WORKDIR /tmp/sppIDer/
+ENTRYPOINT ["/usr/bin/python2.7"]
+CMD ["docker_helper.py"]
 
 

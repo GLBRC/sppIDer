@@ -4,6 +4,7 @@
 .DS_Store
 [Tt]humbs.db
 
-# temp files
+# test/temp files
 .*.swp
+test/
 

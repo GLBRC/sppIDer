@@ -1,3 +1,5 @@
+#! /usr/bin/Rscript
+options(stringAsFactors=FALSE)
 require(ggplot2)
 args <- commandArgs(TRUE)
 outputPrefix <- args[1]
@@ -11,16 +13,25 @@ depthOpt <- args[2]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
+
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData.wWholeGenome <- read.table(paste(outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
-bedData <- read.table(paste(outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
+bedData.wWholeGenome <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
+bedData <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
 completeChromList <- unlist(list(unique(bedData$species)))
+## INLINE TESTS
+#print ("============== length(completeChromList)")
+#print (length(completeChromList))
 output <- data.frame()
 
 species <- c()
 #Split chr name from spcecies name
 for (i in 1:length(completeChromList)) {
   completeChrString <- toString(completeChromList[[i]])
+  ## INLINE TESTS
+  #print ('============== completeChrString')
+  #print (completeChrString)
   split <- unlist(strsplit(completeChrString, "-"))
   species <- c(species, split[1])
 }
@@ -101,7 +112,7 @@ vertLines <- geom_vline(xintercept = speciesBreaks)
 fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 pointLegend <- scale_color_manual(name="Species", values=colors, breaks=uniSpecies, labels=gsub("_", " ", uniSpecies))
 
-pdf(paste(outputPrefix, "_speciesDepth.pdf", sep=''), width=14)
+pdf(paste(workingDir, outputPrefix, "_speciesDepth.pdf", sep=""), width=14)
 
 if (length(uniSpecies)<11){
   xaxis <- scale_x_continuous(breaks=labelPos, labels=spcLabels, name="Genome Position", limits=c(0,NA))
@@ -115,3 +126,5 @@ plot(plot+plotTitle+xaxis+yaxis+totalFill+vertLines+line+ theme_classic()+fillLe
 yaxis <- scale_y_continuous(name="log2(avg/whole genome avg)", limits = c(0,max(spcLabeled$log2)+(.1*max(spcLabeled$log2))))
 plotTitle <- ggtitle(paste(outputPrefix, "log2 Mean Avg depth of coverage", sep=" "))
 plot(plot+plotTitle+xaxis+yaxis+totalFillMean+vertLines+line+ theme_classic()+fillLegend+theme(axis.text.x=element_text(face="italic"), legend.text=element_text(face="italic")))
+
+dev.off()

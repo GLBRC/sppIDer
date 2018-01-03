@@ -1,3 +1,5 @@
+#! /usr/bin/Rscript
+options(stringAsFactors=FALSE)
 require(ggplot2)
 args <- commandArgs(TRUE)
 strainName <- args[1]
@@ -10,10 +12,13 @@ strainName <- args[1]
 #
 ################################################################
 
+# docker vars
+workingDir <- "/tmp/sppIDer/working/"
+
 #Read in data and determine species
-summaryOutputName <- paste(strainName, "MQsummary.txt", sep="_")
-plotOutputName <- paste(strainName, "plotMQ.pdf", sep="_")
-MQdf <- read.table(paste(strainName, "_MQ.txt", sep=""), header=T)
+summaryOutputName <- paste(workingDir, strainName, "_MQsummary.txt", sep="")
+plotOutputName <- paste(workingDir, strainName, "_plotMQ.pdf", sep="")
+MQdf <- read.table(paste(workingDir, strainName, "_MQ.txt", sep=""), header=T)
 levels(MQdf$Species) <- c(levels(MQdf$Species), "Unmapped")
 MQdf$Species[MQdf$Species=="*"] <- "Unmapped"
 uniSpecies <- unlist(list(unique(MQdf$Species)))
@@ -97,11 +102,12 @@ if (length(uniSpecies)>11){
 
 #Plot the data
 pdf(plotOutputName, compress=T, width=10)
-ggplot(MQprop, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mapping bar plot", sep=" "))+labs(x = "Species", y="Percentage")+fillLegend+themeUnmap+scale_y_continuous(limits=c(0,100))
-ggplot(MQpropPos, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Maps to ref bar plot", sep=" "))+labs(x = "Species", y = "Percentage")+fillLegend+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))+scale_y_continuous(limits=c(0,100))
+ggplot(MQprop, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mapping bar plot w/ unmapped", sep=" "))+labs(x = "Species", y="Percentage")+fillLegend+themeUnmap+scale_y_continuous(limits=c(0,100))
+ggplot(MQpropPos, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mappping bar plot w/out unmapped", sep=" "))+labs(x = "Species", y = "Percentage")+fillLegend+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))+scale_y_continuous(limits=c(0,100))
 options(warn = -1)
-ggplot(maps, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Mapping violin (count scaled)", sep=" "))+labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
+ggplot(maps, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Mapping quality", sep=" "))+labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
 #ggplot(mapsNonZero, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Positive Mapping violin (count scaled)", sep=" "))+ labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
 
 options(warn = 1)
 
+dev.off()

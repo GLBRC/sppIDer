@@ -8,10 +8,13 @@ import sys, re, time
 # Input: sam file of reads mapped to a combination reference genome
 ################################################################
 
+# docker vars
+workingDir = "/tmp/sppIDer/working/"
 
 inputName = sys.argv[1]
-samName = inputName+"_aln-pe.sam"
+samName = inputName+".sam"
 outputName = inputName+"_MQ.txt"
+outputLenName = inputName+"_chrLens.txt"
 start = time.time()
 
 speciesDict = {}
@@ -19,10 +22,8 @@ MQscoreDict = {}
 speciesDict["*"] = {}
 speciesDict["*"][0] = 0
 speciesList = ['*']
-
-print(samName)
-
-sam = open(samName, 'r')
+outputLen = open(workingDir + outputLenName, 'w')
+sam = open(workingDir + samName, 'r')
 samLines = sam.read().splitlines()
 for line in samLines:
     if re.match('^(@SQ)', line):
@@ -31,7 +32,9 @@ for line in samLines:
         chrName = chrInfo.split("-")
         speciesName = chrName[0]
         chrNum = int(chrName[1])
-        if chrNum==0:
+        chrLen = headerInfo[2].split(":")[1]
+        outputLen.write(chrInfo+"\t"+chrLen+"\n")
+        if chrNum==1:
             speciesList.append(speciesName)
             speciesDict[speciesName] = {}
             for i in range(0, 61):
@@ -44,8 +47,9 @@ for line in samLines:
         MQscore = int(lineSplit[4])
         count = speciesDict[species][MQscore]
         speciesDict[species][MQscore] = count+1
+outputLen.close()
 
-output = open(outputName, 'w')
+output = open(workingDir + outputName, 'w')
 output.write("Species\tMQscore\tcount\n")
 for species in speciesList:
     for score in speciesDict[species].keys():
