@@ -29,7 +29,7 @@ for spc in species:
     spc = spc.strip().split('\t')
     uniID = spc[0]
     gffName = spc[1]
-    spcGFF = open(gffName, 'r')
+    spcGFF = open(workingDir+gffName, 'r')
     lines = spcGFF.readlines()
     for line in lines[3:]:
         lineInfo = line.strip().split('\t')
