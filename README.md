@@ -42,9 +42,31 @@ docker run --rm -it glbrc/sppider sppIDer.py -h
 
 ### Pipeline Usage
 
+Workflow:
+- The combination reference genome must be built first using combineRefGenomes.py. The outputs can be used many times with sppIDer.py with different data sets.
+- The main pipeline, sppIDer.py, takes fastq input(s) and maps the reads to the combined reference genome made with combineRefGenomes.py.
+- The pipeline then uses bioinfromatic tools and custom scripts to pares this output for where, how well, and how deeply the reads map to combined reference genome by species, chromosomes, and windows. 
+- The output is several pdfs with plots of precentage and quality of reads mapped and plots for coverage by species and in windows. Addionally several summary text files are created.
+- All files are kept from intermediate steps and could be used in other anlyses. 
+
 Notes:  
 - Execute the container with a host volume mount, as shown below, to retrieve pipeline output files into the host machine's current working directory  
 - Providing the example "--user" switch will write to output files using permissions of the host user  
+
+
+##### example: executing a combineRefGenome.py  
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  combineRefGenomes.py
+  --out REF.fasta \ 
+  --key KEY.txt
+```
+An optional --trim can be used to trim short uninformative contigs for reference genomes with many short contigs. All contigs shorter than the supplied interger will be ignored.
+The KEY.txt file must be tab delimited and the reference genome unique name cannot contain hyphens. See example.
 
 ##### example: executing a sppIDer.py pipeline  
 ```
@@ -59,6 +81,35 @@ glbrc/sppider \
   --r1 R1.fastq \
   --r2 R2.fastq
 ```
+An optional --byGroup flag can be used for very large combination genomes. This produce a bedfile that doesn't have coverage information for each basepair but by groups. Which speeds up the run.
+
+###### For mitoSppIDer
+##### example: executing combineGFF.py  
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  combineRefGenomes.py
+  --out REF.gff \ 
+  --key GFF_KEY.txt
+```
+
+##### example: executing a mitoSppIDer.py pipeline  
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  mitoSppIDer.py \
+  --out OUT \
+  --ref MITO_REF.fasta \
+  --r1 R1.fastq \
+  --r2 R2.fastq
+```
+An optional --gff can be used if you are providing a combined gff of the regions that should be marked on the final plots.
 
 
 ### System Requirements 

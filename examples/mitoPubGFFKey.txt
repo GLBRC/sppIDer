@@ -1,0 +1,7 @@
+Scer_pub	S288c_mtDNA.gff
+Spar_pub	CBS432_mtDNA.gff
+Smik_pub	KX707788_mtDNA.gff
+Skud_pub	KX707787-Skud_mtDNA.gff
+Sarb_pub	CBS10644_mtDNA.gff
+Suva_pub	CBS395_mtDNA.gff
+Seub_pub	FM1318_mtDNA.gff

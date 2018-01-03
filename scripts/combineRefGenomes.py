@@ -6,7 +6,10 @@ from Bio import SeqIO
 # This script will create the combination reference genome and all additional files needed to run the full sppIDer script.
 #
 #Program Requirements: bwa, samtools
-#Input: output name, text file key of genome names, and desired minimum length of contigs included
+#Input: output name prefix, text file key of genome names, and optional desired minimum length of contigs included (default is to keep all contigs)
+#The text file key must be a tab seperated list of unique name for each genome and the actual fasta name for that genome, e.g.
+#Saccharomyces_cerevisaie   S288c.fasta
+#Saccharomyces_paradoxus    GCA_002079055.1.fasta
 #
 ################################################################
 
@@ -16,7 +19,7 @@ workingDir = "/tmp/sppIDer/working/"
 parser = argparse.ArgumentParser(description="Combine desired reference genomes")
 parser.add_argument('--out', help="Output prefix, required", required=True)
 parser.add_argument('--key', help="Key to reference genomes, required", required=True)
-parser.add_argument('--trim', help="Maximum contig length to trim", default=0)
+parser.add_argument('--trim', help="Trim any contigs smaller than this value (for genomes in many small contigs)", default=0)
 args = parser.parse_args()
 comboGenomeName = args.out
 listName = args.key
