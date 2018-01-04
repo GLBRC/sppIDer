@@ -78,6 +78,7 @@ else:
         trackerOut.write("gff=" + args.gff + "\n")
     trackerOut.close()
     subprocess.call(["bwa", "mem", "-t", numCores, ref, read1Name], stdout=bwaOutFile, cwd=workingDir)
+bwaOutFile.close()
 print("BWA complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -104,7 +105,8 @@ trackerOut.close()
 bedOutD = outputPrefix + "-d.bedgraph"
 sortOut = bamSortOut
 bedFileD = open(workingDir + bedOutD, 'w')
-subprocess.call(["genomeCoverageBed", "-d", "-ibam", sortOut], stdout=bedFileD)
+subprocess.call(["genomeCoverageBed", "-d", "-ibam", sortOut], stdout=bedFileD, cwd=workingDir)
+bedFileD.close()
 print("bedgraph complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
@@ -114,7 +116,7 @@ trackerOut.write("\nbedgraph complete\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## parse SAM file ###########################
-subprocess.call(["python2.7", scriptDir + "parseSamFile.py", outputPrefix])
+subprocess.call(["python2.7", scriptDir + "parseSamFile.py", outputPrefix], cwd=workingDir)
 print("Parsed SAM file")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
