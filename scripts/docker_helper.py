@@ -24,10 +24,11 @@ def main():
     print ''
     print 'docker run --rm -it glbrc/sppider [pipeline_script] --help'
     print ''
-    print 'pipeline scripts:'
+    print 'available pipeline scripts:'
+    print '  combineGFF.py'
+    print '  combineRefGenomes.py'
     print '  sppIDer.py'
     print '  mitoSppIDer.py'
-    print '  combineRefGenomes.py'
     print ''
     print colors.blue + 'sppIDer.py usage example:' + colors.end
     print ''

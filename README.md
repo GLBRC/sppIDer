@@ -93,7 +93,7 @@ docker run \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
 --user "$UID:$(id -g $USERNAME)" \
 glbrc/sppider \
-  combineRefGenomes.py
+  combineGFF.py
   --out REF.gff \ 
   --key GFF_KEY.txt
 ```
