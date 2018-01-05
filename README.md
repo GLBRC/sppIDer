@@ -116,5 +116,5 @@ An optional --gff can be used if you are providing a combined gff of the regions
 
 ### System Requirements 
 
-This pipeline has been tested on a CentOS 7.4 (1708) host running [Docker Community Edition (CE) Stable](https://docs.docker.com/engine/installation/) (17.09.0.ce).
+This pipeline has been tested on a CentOS 7.4 (1708) host running [Docker Community Edition (CE) Stable](https://docs.docker.com/engine/installation/) (17.12.0-ce).
 
