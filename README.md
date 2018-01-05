@@ -1,6 +1,6 @@
 # sppIDer
 
-sppIDer is a pipeline for looking at genome composition in hybrid genomes and check for chromosomal copy variants in single species strains.  
+sppIDer is a pipeline for looking at genome composition in hybrid genomes and checking for chromosomal copy variants in single species strains.  
 
 sppIDer.py is the main wrapper that calls established bioinformatic tools and custom scripts. This pipeline needs a combination reference genome and one or more short read (fastq) files. 
 
@@ -8,6 +8,7 @@ _The sppIDer docker image is a self-contained platform capable of executing its 
 
 _Changes to this source repo are automatically built into an updated docker image, available from docker hub at [glbrc/sppider](https://hub.docker.com/r/glbrc/sppider/)._
 
+Additional detailed usage information is available in the [sppIDer manual](sppIDerManual.md).
 
 ### Getting Started
 
