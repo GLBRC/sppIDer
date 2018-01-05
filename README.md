@@ -4,7 +4,9 @@ sppIDer is a pipeline for looking at genome composition in hybrid genomes and ch
 
 sppIDer.py is the main wrapper that calls established bioinformatic tools and custom scripts. This pipeline needs a combination reference genome and one or more short read (fastq) files. 
 
-_The sppIDer docker image is a self-contained platform capable of executing its pipeline without requiring cumbersome managment and installation of prerequisite tools._  
+_The sppIDer docker image is a self-contained platform capable of executing its pipeline without requiring cumbersome managment and installation of prerequisite tools._   
+
+_Changes to this source repo are automatically built into an updated docker image, available from docker hub at [glbrc/sppider](https://hub.docker.com/r/glbrc/sppider/)._
 
 
 ### Getting Started
