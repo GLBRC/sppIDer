@@ -15,7 +15,7 @@ outputPrefix <- args[1]
 workingDir <- "/tmp/sppIDer/working/"
 
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=T)
+#bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=T)
 bedData <- read.table(paste(workingDir, outputPrefix, "_winAvgDepth-d.txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species", "chrom", "start",  "end", "meanValue", "relativeMean", "max", "median"))
 #Read in gff dat if it exists
 if (length(args)==2){
@@ -59,6 +59,8 @@ for (i in uniSpecies){
   colors[i] <- colorList[index]
   speciesData <- subset(bedData, species==i)
   spc99Mean <- quantile(speciesData$meanValue, 0.99)[[1]]
+  spcEnd <- speciesData$end[length(speciesData$end)]
+  endsDF <- rbind(endsDF, data.frame("end"=spcEnd, "species"=i))
   if (is.na(spc99Mean)){
     spc99Mean <- 0
   }
@@ -67,10 +69,8 @@ for (i in uniSpecies){
     sigTable <- rbind(sigTable, speciesData)
     sigEnds <- rbind(sigEnds, data.frame("end"=spcEnd, "species"=i))
   }
-  spcEnd <- speciesData$end[length(speciesData$end)]
-  endsDF <- rbind(endsDF, data.frame("end"=spcEnd, "species"=i))
 }
-pdf(paste(workingDir, outputPrefix, "mitoSppIDerDepthPlot-d.pdf", sep=""), width=14, onefile = TRUE)
+pdf(paste(workingDir, outputPrefix, "_mitoSppIDerDepthPlot-d.pdf", sep=""), width=14, onefile = TRUE)
 line <- geom_abline(intercept=0, slope=0)
 xaxis <- scale_x_continuous(name="Genome Position", limits=c(0,NA)) 
 yaxis <- scale_y_continuous(name="Average Depth", limits = c(0,NA))
@@ -125,7 +125,7 @@ if (exists("gffKey")){
   middleLabels <- geom_text(data = transform(middleLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 'center', aes(x=Midpoint, label =Name, y=yPosLog2))
   topLabels <- geom_text(data = transform(topLabs, species=factor(species, levels=uniSpecies)), colour="black", size = 2.5, show.legend=F, check_overlap = T, angle = 0, vjust = 1, aes(x=Midpoint, label =Name, y=yPosLog2))
   yaxis <- scale_y_continuous(name="log2(Average Depth)", limits = c(0,NA))
-  print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+CDSstartLines+CDSendLines+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
+  #print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+CDSstartLines+CDSendLines+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
   print(ggplot()+shade+geom_point(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(start, log2, colour = species),size=0.5)+facet_grid(species ~ .)+theme_classic()+line+scale_colour_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Log2 Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
   print(ggplot()+shade+geom_ribbon(data=transform(bedData, species=factor(species, levels=uniSpecies)), aes(x=start, ymin=0, ymax=log2, fill=species))+facet_grid(species ~ .)+theme_classic()+line+scale_fill_manual(values=colors, name="Species")+xaxis+yaxis+ggtitle(paste(outputPrefix, "Avg depth of coverage", sep=" "))+bottomLabels+middleLabels+topLabels+geom_vline(xintercept = 0)+plotVertEnd)
   #Limited all species
