@@ -1,11 +1,14 @@
 # sppIDer
 
-sppIDer is a pipeline for looking at genome composition in hybrid genomes and check for chromosomal copy variants in single species strains.  
+sppIDer is a pipeline for looking at genome composition in hybrid genomes and checking for chromosomal copy variants in single species strains.  
 
 sppIDer.py is the main wrapper that calls established bioinformatic tools and custom scripts. This pipeline needs a combination reference genome and one or more short read (fastq) files. 
 
-_The sppIDer docker image is a self-contained platform capable of executing its pipeline without requiring cumbersome managment and installation of prerequisite tools._  
+_The sppIDer docker image is a self-contained platform capable of executing its pipeline without requiring cumbersome managment and installation of prerequisite tools._   
 
+_Changes to this source repo are automatically built into an updated docker image, available from docker hub at [glbrc/sppider](https://hub.docker.com/r/glbrc/sppider/)._
+
+Additional detailed usage information is available in the [sppIDer manual](sppIDerManual.md).
 
 ### Getting Started
 
@@ -38,7 +41,8 @@ docker run --rm -it glbrc/sppider sppIDer.py -h
                   with -byGroup
       --byGroup   Calculate coverage by chunks of same coverage, optional, can't
                   be used with -byBP
-```
+```  
+
 
 ### Pipeline Usage
 
@@ -52,6 +56,8 @@ Workflow:
 Notes:  
 - Execute the container with a host volume mount, as shown below, to retrieve pipeline output files into the host machine's current working directory  
 - Providing the example "--user" switch will write to output files using permissions of the host user  
+- All input fastqs and reference files must be in the same directory. The output will be written to the working directory  
+- The largest test dataset is 587.8Mb and took ~22 minutes to run with 4 cores and 8GB  
 
 
 ##### example: executing a combineRefGenome.py  
@@ -91,7 +97,7 @@ docker run \
 --mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
 --user "$UID:$(id -g $USERNAME)" \
 glbrc/sppider \
-  combineRefGenomes.py
+  combineGFF.py
   --out REF.gff \ 
   --key GFF_KEY.txt
 ```
@@ -114,7 +120,5 @@ An optional --gff can be used if you are providing a combined gff of the regions
 
 ### System Requirements 
 
-This pipeline has been tested on a CentOS 7.4 (1708) host running [Docker Community Edition (CE) Stable] (https://docs.docker.com/engine/installation/) (17.09.0.ce).
-
-
+This pipeline has been tested on a CentOS 7.4 (1708) host running [Docker Community Edition (CE) Stable](https://docs.docker.com/engine/installation/) (17.12.0-ce).
 
