@@ -232,7 +232,7 @@ An optional --gff can be used if you are providing a combined gff of the regions
 Below are examples for the stand alone scripts the data or example outputs can be found in [examples](examples)
   
 ## combineRefGenomes.py  
-For a working *Saccharomyces* combined reference genome use the example below with the files found in [exampleCombineRef](examples/exampleCombineRef.tar.gz)
+For a working *Saccharomyces* combined reference genome locations can be found in [example_information.md](examples/example\_information.md).  
 
 ``` 
 docker run \
@@ -249,7 +249,8 @@ The output from this can be used as the reference input for sppIDer.py
 All files must be kept together in the same directory to be usable. 
 
 ## sppIDer.py  
-Fastq files to test can be found in [exampleFastqs](examples/exampleFastqs.tar.gz)
+Info on where example short read data can be found can be found in [example_information.md](examples/example\_information.md).  
+
 ### Pure strain isolated from North Carolina  
 ```  
 docker run \
@@ -302,7 +303,7 @@ For this cider strain reads map to _Saccharomyces cerevisiae_, _Saccharomyces ku
 ~22 minutes to run with 4 cores and 8GB.  
 
 ## mitoSppIDer scripts  
-All files to make the combination reference fasta and gff can be found in [exampleMito](examples/exampleMito.tar.gz).  
+Information about all files to make the combination reference fasta and gff can be found can be found in [example_information.md](examples/example\_information.md).  
 
 ### combineGFF.py
 ```

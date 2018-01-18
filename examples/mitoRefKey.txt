@@ -1,0 +1,7 @@
+Scer_mito	S288c_mtDNA.fasta
+Spar_mito	CBS432_mtDNA.fasta
+Smik_mito	KX707788_mtDNA.fasta
+Skud_mito	KX707787-Skud_mtDNA.fasta
+Sarb_mito	CBS10644_mtDNA.fasta
+Suva_mito	CBS395_mtDNA.fasta
+Seub_mito	FM1318_mtDNA.fasta
