@@ -1,6 +1,14 @@
 # sppIDer Manual  
 
 ---
+See [README](README.md) for less detailed explanation.  
+See [example datasets](examples) for data to test with and the end of manual for usage of these examples.  
+See [workflow](workflow.pdf) for a cartoon flowchart of the steps involved.   
+
+Note: The needed inputs must be in the directory you run the docker from. All outputs will also be saved here.
+The largest test dataset (SRR1119201) is 587.8Mb and took ~22 minutes to run with 4 cores and 8GB.
+
+---
 ## combineRefGenomes.py  
 This script requires all the reference genomes to be in one location with a key between the file names and what the reference genome should be named in the combined genome. Additionally, a desired output name for the reference fasta is required and the optional trim threshold is allowed. The order the genomes are concatenated follow the order in the key file, the order of the chromosome/scaffolds/contigs will remain as they are in the given reference file, but will be renamed by the name in the key file and numbered sequentially. The key should be a text file with a list of the “desired reference name” and the actual reference fasta separated by a tab. The “desired reference name” cannot include any hyphens (-) an example is given as “SaccharomycesRefKey.txt”. The output will be a concatenated reference with the “desired reference name” and chromosome number (as an Arabic numeral) separated by a hyphen. This format is necessary for the plotting scripts which parse the chromosome names. There is an optional –trim flag so that any contigs shorter than the given interger are not included. For genomes with many short uninformative contigs this reduces the memory usage and speeds things up.  Two steps in sppIDer require index files for the genome used, thus this custom script will also make these required files.  
 
@@ -217,4 +225,125 @@ An optional --gff can be used if you are providing a combined gff of the regions
 - Inputs:  
   - output\_winAvgDepth-d.txt  
   - combine.gff  
-- Outputs: output\_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows
+- Outputs: output\_sppIDerDepthPlot-d.pdf - Plot of coverage by mito-genome split into 10,000 windows  
+
+
+# Examples:  
+Below are examples for the stand alone scripts the data or example outputs can be found in [examples](examples)
+  
+## combineRefGenomes.py  
+For a working *Saccharomyces* combined reference genome locations can be found in [example_information.md](examples/example\_information.md).  
+
+``` 
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  combineRefGenomes.py
+  --out SaccharomycesCombo.fasta \ 
+  --key SaccharomycesGenomesKey.txt
+
+```  
+The output from this can be used as the reference input for sppIDer.py  
+All files must be kept together in the same directory to be usable. 
+
+## sppIDer.py  
+Info on where example short read data can be found can be found in [example_information.md](examples/example\_information.md).  
+
+### Pure strain isolated from North Carolina  
+```  
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  sppIDer.py \
+  --out SRR2586160 \
+  --ref SaccharomycesCombo.fasta \
+  --r1 SRR2586160_1.fastq \
+  --r2 SRR2586160_2.fastq  
+
+```  
+For this strain reads map predominantly to the _Saccharomyces eubayanus_ reference. Examples of the plot outputs and example text file outputs can be found in [exampleOutputs](examples/exampleOutputs.tar.gz).  
+~18 minutes to run with 4 cores and 8GB  
+
+### Lager brewing strain, two way hybrid  
+```  
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  sppIDer.py \
+  --out SRR2586169 \
+  --ref SaccharomycesCombo.fasta \
+  --r1 SRR2586169_1.fastq \
+  --r2 SRR2586169_2.fastq  
+
+```  
+For this strain reads map to both _Saccharomyces cerevisiae_ and _Saccharomyces eubayanus_ references, which is expected of a Lager strain. Examples of the plot outputs and example text file outputs can be found in [exampleOutputs](examples/exampleOutputs.tar.gz).  
+~17 minutes to run with 4 cores and 8GB  
+
+### Multiway hybrid
+```  
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  sppIDer.py \
+  --out SRR1119201 \
+  --ref SaccharomycesCombo.fasta \
+  --r1 SRR1119201_1.fastq \
+  --r2 SRR1119201_2.fastq  
+
+```  
+For this cider strain reads map to _Saccharomyces cerevisiae_, _Saccharomyces kudriavzevii_, and _Saccharomyces uvarum_ with minor contributions from _Saccharomyces eubayanus_. Examples of the plot outputs and example text file outputs can be found in [exampleOutputs](examples/exampleOutputs.tar.gz).  
+~22 minutes to run with 4 cores and 8GB.  
+
+## mitoSppIDer scripts  
+Information about all files to make the combination reference fasta and gff can be found can be found in [example_information.md](examples/example\_information.md).  
+
+### combineGFF.py
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  combineGFF.py
+  --out SaccharomycesMitoCombo.gff \ 
+  --key mitoGFFKey.txt
+   
+```    
+
+### combineRefGenomes.py
+``` 
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  combineRefGenomes.py
+  --out SaccharomycesMitoCombo.fasta \ 
+  --key mitoRefKey.txt
+
+```  
+
+### mitoSppIDer.py
+```
+docker run \
+--rm -it \
+--mount type=bind,src=$(pwd),target=/tmp/sppIDer/working \
+--user "$UID:$(id -g $USERNAME)" \
+glbrc/sppider \
+  mitoSppIDer.py \
+  --out SRR2586169mito \
+  --ref SaccharomycesMitoCombo.fasta \
+  --gff SaccharomycesMitoCombo.gff \
+  --r1 SRR2586169_1.fastq \
+  --r2 SRR2586169_2.fastq
+```  
+
+

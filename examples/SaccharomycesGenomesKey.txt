@@ -1,0 +1,7 @@
+Scer	Scer.fasta
+Spar	Spar.fasta
+Smik	Smik.fasta
+Skud	SkudZP.fasta
+Sarb	Sarb.fasta
+Suva	Suva.fasta
+Seub	Seub_wMito.fasta

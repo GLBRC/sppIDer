@@ -1,0 +1,7 @@
+Scer_mito	S288c_mtDNA.gff
+Spar_mito	CBS432_mtDNA.gff
+Smik_mito	KX707788_mtDNA.gff
+Skud_mito	KX707787-Skud_mtDNA.gff
+Sarb_mito	CBS10644_mtDNA.gff
+Suva_mito	CBS395_mtDNA.gff
+Seub_mito	FM1318_mtDNA.gff

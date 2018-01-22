@@ -41,7 +41,8 @@ docker run --rm -it glbrc/sppider sppIDer.py -h
                   with -byGroup
       --byGroup   Calculate coverage by chunks of same coverage, optional, can't
                   be used with -byBP
-```
+```  
+
 
 ### Pipeline Usage
 
@@ -55,6 +56,8 @@ Workflow:
 Notes:  
 - Execute the container with a host volume mount, as shown below, to retrieve pipeline output files into the host machine's current working directory  
 - Providing the example "--user" switch will write to output files using permissions of the host user  
+- All input fastqs and reference files must be in the same directory. The output will be written to the working directory  
+- The largest test dataset is 587.8Mb and took ~22 minutes to run with 4 cores and 8GB  
 
 
 ##### example: executing a combineRefGenome.py  
