@@ -21,7 +21,8 @@ strainName <- args[1]
 ################################################################
 
 # docker vars
-workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- "/tmp/sppIDer/working/"
+workingDir <- ""
 
 spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-d.txt", sep="")
 chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-d.txt", sep="")
@@ -125,7 +126,9 @@ for (species in uniSpecies) {
     oneChrData <- chrData[[k]]
     oneChrData$Genome_Pos <- oneChrData$chromPos + chrCumLen
     windowBounds <- seq(0, oneChrData$chromPos[nrow(oneChrData)], stepSize)
-    windowBounds <- c(windowBounds, max(oneChrData$chromPos))
+    if (max(oneChrData$chromPos) %in% windowBounds == F) {
+      windowBounds <- c(windowBounds, max(oneChrData$chromPos))
+    }
     oneChrData$bin <- cut(oneChrData$chromPos, breaks=windowBounds, include.lowest = T)
     #tic("Windows")
     winData <- splitBy("bin", oneChrData)
