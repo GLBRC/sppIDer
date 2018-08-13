@@ -158,12 +158,14 @@ trackerOut.write("\nFound mean depth\nElapsed time: " + elapsedTime)
 trackerOut.close()
 
 ########################## make plot ###########################
-if args.bed == True:
-    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "d"], cwd=workingDir)
-    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-d.R", outputPrefix], cwd=workingDir)
-else:
-    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "g"], cwd=workingDir)
-    subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-bga.R", outputPrefix], cwd=workingDir)
+subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix], cwd=workingDir)
+subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot.R", outputPrefix], cwd=workingDir)
+# if args.bed == True:
+#     subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "d"], cwd=workingDir)
+#     subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-d.R", outputPrefix], cwd=workingDir)
+# else:
+#     subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot_forSpc.R", outputPrefix, "g"], cwd=workingDir)
+#     subprocess.call(["Rscript", scriptDir + "sppIDer_depthPlot-bga.R", outputPrefix], cwd=workingDir)
 print("Plot complete")
 currentTime = time.time()-start
 elapsedTime = calcElapsedTime(currentTime)
