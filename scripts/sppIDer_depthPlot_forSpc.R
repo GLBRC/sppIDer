@@ -3,7 +3,7 @@ options(stringAsFactors=FALSE)
 require(ggplot2)
 args <- commandArgs(TRUE)
 outputPrefix <- args[1]
-depthOpt <- args[2]
+#depthOpt <- args[2]
 
 ################################################################
 # This script makes the depth plots by species
@@ -14,11 +14,18 @@ depthOpt <- args[2]
 ################################################################
 
 # docker vars
-workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- "/tmp/sppIDer/working/"
+workingDir <- ""
 
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
-bedData.wWholeGenome <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=T)
-bedData <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
+dataFileName <- paste(workingDir, outputPrefix, "_speciesAvgDepth-d.txt", sep="")
+if (file.exists(dataFileName)){
+  bedData <- read.table(dataFileName, header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
+} else {
+  dataFileName <- paste(workingDir, outputPrefix, "_speciesAvgDepth-g.txt", sep="")
+  bedData <- read.table(dataFileName, header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
+}
+#bedData <- read.table(paste(workingDir, outputPrefix, "_speciesAvgDepth-", depthOpt, ".txt", sep=""), header=F, skip=2, col.names = c("Genome_Pos", "species",  "end", "meanValue", "relativeMean", "max", "median"))
 completeChromList <- unlist(list(unique(bedData$species)))
 ## INLINE TESTS
 #print ("============== length(completeChromList)")
