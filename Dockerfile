@@ -10,7 +10,7 @@
 
 ### base image
 # https://hub.docker.com/_/centos/
-FROM centos:7.4.1708
+FROM centos:7.5.1804
 
 
 ### install prereqs
@@ -80,6 +80,7 @@ RUN R --vanilla -e 'install.packages("data.table", dependencies=TRUE, repos="htt
 RUN R --vanilla -e 'install.packages("doBy", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 RUN R --vanilla -e 'install.packages("dplyr", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 RUN R --vanilla -e 'install.packages("ggplot2", dependencies=TRUE, repos="http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages("modes", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 
 
 ### python 2.7 

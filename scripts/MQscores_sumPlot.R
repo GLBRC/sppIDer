@@ -14,13 +14,16 @@ strainName <- args[1]
 
 # docker vars
 workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- ""
 
 #Read in data and determine species
+chiSqOutName <- paste(workingDir, strainName, "_MQ_chiSquared.txt", sep="")
 summaryOutputName <- paste(workingDir, strainName, "_MQsummary.txt", sep="")
 plotOutputName <- paste(workingDir, strainName, "_plotMQ.pdf", sep="")
 MQdf <- read.table(paste(workingDir, strainName, "_MQ.txt", sep=""), header=T)
 levels(MQdf$Species) <- c(levels(MQdf$Species), "Unmapped")
 MQdf$Species[MQdf$Species=="*"] <- "Unmapped"
+MQdfForChiSq <- MQdf
 uniSpecies <- unlist(list(unique(MQdf$Species)))
 uniSpecies <- factor(uniSpecies, levels=uniSpecies)
 spRe <- " "
@@ -45,7 +48,9 @@ write("Species\tTotal mapped reads\t% of all reads\t% Nonzero mapped reads\tAll 
 
 MQprop <- data.frame("Species"=character(), "Percentage"=numeric())
 MQpropPos <- data.frame()
+MQcounts <- data.frame(Species=character(), totalCount = numeric(), nonZeroCount = numeric())
 speciesCountDF <- data.frame()
+violin_df <- data.frame()
 #Go though data by species and quantify how many and how well reads mapped
 for (species in uniSpecies){
     speciesNonZeroMQscores <- subset(MQscoresNonZero, Species==species)
@@ -53,14 +58,31 @@ for (species in uniSpecies){
     speciesCountDF <- rbind(speciesCountDF, data.frame("species"=species, "sum"=speciesCount))
     propSpeciesNonZero <-  (speciesCount/sum(MQscoresNonZero$count))*100
     speciesMQscores <- subset(MQdf, Species==species)
+    speciesTotalCount <- sum(speciesMQscores$count)
     propSpecies <- (sum(speciesMQscores$count)/sum(MQdf$count))*100
     speciesMean <- weighted.mean(speciesMQscores$MQscore, speciesMQscores$count)
+    if (is.na(speciesMean)){
+      speciesMean <- 0
+    }
     speciesMedian <- median(rep(speciesMQscores$MQscore, times=speciesMQscores$count))
+    if (is.na(speciesMedian)){
+      speciesMedian <- 0
+    }
     speciesMeanNonZero <- weighted.mean(speciesNonZeroMQscores$MQscore, speciesNonZeroMQscores$count)
+    if (is.na(speciesMeanNonZero)){
+      speciesMeanNonZero <- 0
+    }
     speciesMedianNonZero <- median(rep(speciesNonZeroMQscores$MQscore, times=speciesNonZeroMQscores$count))
-    write(paste(species, "\t", toString(sum(speciesMQscores$count)), "\t", toString(round(propSpecies, digits=2)), "%\t", toString(round(propSpeciesNonZero, digits=2)), "%\t", toString(round(speciesMean, digits=2)), "\t", toString(round(speciesMeanNonZero, digits=2)), "\t", toString(round(speciesMedian, digits=2)), "\t", toString(round(speciesMedianNonZero, digits=2)),  sep=""), file=summaryOutputName, append=T)
+    if (is.na(speciesMedianNonZero)){
+      speciesMedianNonZero <- 0
+    }
+    write(paste(species, "\t", toString(speciesTotalCount), "\t", toString(round(propSpecies, digits=2)), "%\t", toString(round(propSpeciesNonZero, digits=2)), "%\t", toString(round(speciesMean, digits=2)), "\t", toString(round(speciesMeanNonZero, digits=2)), "\t", toString(round(speciesMedian, digits=2)), "\t", toString(round(speciesMedianNonZero, digits=2)),  sep=""), file=summaryOutputName, append=T)
     MQprop <- rbind(MQprop, data.frame("Species"=species, "Percentage"=propSpecies))
     MQpropPos <- rbind(MQpropPos, data.frame("Species"=species, "Percentage"=propSpeciesNonZero))
+    MQcounts <- rbind(MQcounts, data.frame(Species=species, totalCount=speciesTotalCount, nonZeroCount =speciesCount))
+    if (speciesCount>0){
+      violin_df <- rbind(violin_df, MQdf[which(MQdf$Species==species),])
+    }
 }
 MQpropPos <- MQpropPos[-1,]
 
@@ -86,6 +108,7 @@ MQprop$Species <- gsub("_", spRe, MQprop$Species)
 maps$Species <- gsub("_", spRe, maps$Species)
 mapsNonZero$Species <- gsub("_", spRe, mapsNonZero$Species)
 spcLabels <- gsub("_", spRe, uniSpecies)
+violin_df$Species <- gsub("_", spRe, violin_df$Species)
 #Set color legends
 fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=spcLabels)
 colorLegend <- scale_colour_manual(name="Species", values = colors, breaks=spcLabels)
@@ -111,3 +134,129 @@ ggplot(maps, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geo
 options(warn = 1)
 
 dev.off()
+
+countSpecies <- matrix(0,nrow=61, ncol=1)
+countSpecies <- data.frame(countSpecies)
+for (species in uniSpecies){
+  spData <- MQdfForChiSq[which(MQdfForChiSq$Species==species),]
+  countData <- spData$count
+  if (species=="Unmapped"){
+    extraData <- rep(0,60)
+    countData <- c(countData, extraData)
+  }
+  countSpecies <- cbind(countSpecies, data.frame(species=countData))
+}
+header <- c("temp", as.character(uniSpecies))
+colnames(countSpecies) <- header
+rownames(countSpecies) <- c(0:60)
+countSpecies <- countSpecies[,-1]
+
+#Removing Zeros and Unmapped
+unmappedCount <- countSpecies[1,1][[1]]
+posCount <- countSpecies[-1,-1]
+posSum <- colSums(posCount)
+posSum <- c(posSum, unmappedCount)
+names(posSum)[length(posSum)] <- "Unmapped"
+countChisq <- chisq.test(posSum)
+#print(countChisq$p.value)
+countContrib <- 10000*(countChisq$residuals/countChisq$statistic)
+#print(countChisq$residuals)
+countRes <- t(data.frame(countChisq$residuals))
+namesRes <- t(data.frame(names(countChisq$residuals)))
+countRes <- rbind(namesRes, countRes)
+countCorrectedContrib <- countContrib-countContrib[length(countContrib)]
+
+MQ60 <- posCount[60,]
+#MQ60$Unmapped <- 0
+mq60chisq <- chisq.test(x=MQ60)
+#print(mq60chisq$p.value)
+#mq60contrib <- 100*(mq60chisq$stdres^2/mq60chisq$statistic)
+#names(mq60contrib) <- colnames(MQ60)
+#print(mq60chisq$residuals)
+mq60Res <- t(data.frame(mq60chisq$residuals))
+namesRes60 <- namesRes[-length(namesRes)]
+mq60Res <- rbind(namesRes60, mq60Res)
+
+write(paste(strainName, " count of reads mapped - Chi Squared P-value ", toString(countChisq$p.value), sep=""), file=chiSqOutName)
+write(countRes, file=chiSqOutName, append=T)
+write(paste(strainName, " MQ60 - Chi Squared P-value ", toString(mq60chisq$p.value), sep=""), file=chiSqOutName, append=T)
+write(mq60Res, file=chiSqOutName, append=T)
+
+# MQ0 <- countSpecies[1,]
+# chisq0 <- chisq.test(MQ0)
+# contrib <- 100*chisq0$residuals^2/chisq0$statistic
+# contribDF <- t(data.frame(contrib))
+# contribDF <- cbind(contribDF, chisq0$p.value)
+# chisqList <- list()
+# chisqList[[1]] <- chisq0 
+# contribOut <- contribDF
+# for (i in c(1:60)){
+#   MQdata <- countSpecies[(i+1),]
+#   chisq <- chisq.test(MQdata)
+#   contrib <- 100*chisq$residuals^2/chisq$statistic
+#   contribDF <- t(data.frame(contrib))
+#   contribDF <- cbind(contribDF, chisq$p.value)
+#   chisqList[[(i+1)]] <- chisq
+#   contribOut <- rbind(contribOut, contribDF)
+# }
+# header <- c(as.character(uniSpecies),"p-value")
+# colnames(contribOut) <- header
+# rownames(contribOut) <- c(0:60)
+#corrplot(contribOut, is.cor=F)
+
+# MQ1 <- posCount[1,]
+# chisq1 <- chisq.test(MQ1)
+# contrib <- 100*chisq1$residuals^2/chisq1$statistic
+# contribDF <- t(data.frame(contrib))
+# contribDF <- cbind(contribDF, chisq1$p.value)
+# chisqList <- list()
+# chisqList[[1]] <- chisq1 
+# contribPos <- contribDF
+# for (i in c(2:59)){
+#   MQdata <- posCount[(i+1),]
+#   chisq <- chisq.test(MQdata)
+#   contrib <- 100*chisq$residuals^2/chisq$statistic
+#   contribDF <- t(data.frame(contrib))
+#   contribDF <- cbind(contribDF, chisq$p.value)
+#   chisqList[[(i+1)]] <- chisq
+#   contribPos <- rbind(contribPos, contribDF)
+# }
+# header <- c(as.character(uniSpecies[2:length(uniSpecies)]),"p-value")
+# colnames(contribPos) <- header
+# rownames(contribPos) <- c(1:60)
+# corrplot(contribPos, is.cor=F)
+
+#top10posCount <-posCount[50:60,]
+#chisq <- chisq.test(top10posCount)
+
+#contribOut.Pval <- contribOut
+#contribOut <- contribOut[,-ncol(contribOut)]
+#unmappedContrib <- contribOut[,1]
+#for (i in 2:ncol(contribOut)){
+#   spDataCorrected <- contribOut[,i]-unmappedContrib
+#   if (i==2) {
+#     correctedOut <- data.frame(spDataCorrected)
+#   } else {
+#     correctedOut <- cbind(correctedOut, spDataCorrected)
+#   }
+#   correctedOut[which(correctedOut[,(i-1)]<0),(i-1)] <- 0
+# }
+# nonZeroCorrected <- correctedOut[-1,]
+# nonZeroCorMeans <- colMeans(nonZeroCorrected)
+# avgContrib <- colMeans(correctedOut)
+# top10 <- correctedOut[51:61,]
+# top10mean <- colMeans(top10)
+# contribTop <- t(contribOut[56:61,-ncol(contribOut)])
+# lenCols <- ncol(contribTop)
+# for (i in 1:lenCols){
+#   contribTop <- cbind(contribTop, (contribTop[,i]-contribTop[1,i]))
+#   contribTop[which(contribTop[,(lenCols+i)]<0),(lenCols+i)] <- 0
+# }
+# 
+# avgContrib <- rowMeans(contribTop[,(lenCols+1):ncol(contribTop)])
+# 
+# rownames(contrib60) <- as.character(uniSpecies)
+# contrib60$corrected <- contrib60$contrib - contrib60[1,1]
+# contrib60$corrected[which(contrib60$corrected<0)] <- 0
+# contrib60$Species <- uniSpecies
+
