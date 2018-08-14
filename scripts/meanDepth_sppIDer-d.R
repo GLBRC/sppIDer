@@ -21,8 +21,8 @@ strainName <- args[1]
 ################################################################
 
 # docker vars
-#workingDir <- "/tmp/sppIDer/working/"
-workingDir <- ""
+workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- ""
 
 spcAvgFile <- paste(workingDir, strainName, "_speciesAvgDepth-d.txt", sep="")
 chrAvgFile <- paste(workingDir, strainName, "_chrAvgDepth-d.txt", sep="")

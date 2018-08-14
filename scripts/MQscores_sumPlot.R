@@ -13,8 +13,8 @@ strainName <- args[1]
 ################################################################
 
 # docker vars
-#workingDir <- "/tmp/sppIDer/working/"
-workingDir <- ""
+workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- ""
 
 #Read in data and determine species
 chiSqOutName <- paste(workingDir, strainName, "_MQ_chiSquared.txt", sep="")

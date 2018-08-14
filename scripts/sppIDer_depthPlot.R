@@ -15,8 +15,8 @@ outputPrefix <- args[1]
 ################################################################
 
 # docker vars
-#workingDir <- "/tmp/sppIDer/working/"
-workingDir <- ""
+workingDir <- "/tmp/sppIDer/working/"
+#workingDir <- ""
 
 introgressCutoff <- 0.01
 #Read in data, get info on window size and spread of mean values. Add log2 and a rescaled mean column to be plotted later.
