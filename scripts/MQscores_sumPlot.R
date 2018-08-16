@@ -85,56 +85,13 @@ for (species in uniSpecies){
     }
 }
 MQpropPos <- MQpropPos[-1,]
-
-#Set color for number of species
-pdf(NULL)
-if (length(uniSpecies)>2) {
-  colorList <- palette(rainbow(length(uniSpecies)-1))
-  colorList <- palette(rainbow(length(uniSpecies)-1))
-} else {
-  colorList <- c("red")
-}
-#Assign colors for each species
-colors <- c()
-for (i in uniSpecies[2:length(uniSpecies)]){
-  index <- which(uniSpecies %in% i)-1
-  colors[gsub("_", spRe, i)] <- colorList[index]
-}
-colors["Unmapped"] <- "darkgrey"
-#Replace "_" with spaces for dataframes
-MQdf$Species <- gsub("_", spRe, MQdf$Species)
-MQpropPos$Species <- gsub("_", spRe, MQpropPos$Species)
-MQprop$Species <- gsub("_", spRe, MQprop$Species)
-maps$Species <- gsub("_", spRe, maps$Species)
-mapsNonZero$Species <- gsub("_", spRe, mapsNonZero$Species)
-spcLabels <- gsub("_", spRe, uniSpecies)
-violin_df$Species <- gsub("_", spRe, violin_df$Species)
-#Set color legends
-fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=spcLabels)
-colorLegend <- scale_colour_manual(name="Species", values = colors, breaks=spcLabels)
-theme <- theme_bw()+theme(legend.text=element_text(face="italic"), axis.text.x=element_text(face="italic"))
-#Remove labels if too many species will make it cluttered.
-if (length(uniSpecies)>11){
-  themeUnmap <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
-  theme <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
-} else if (length(uniSpecies)==11) { 
-  themeUnmap <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
-} else {
-  themeUnmap <- theme 
+noDataSpecies <- MQcounts$Species[which(MQcounts$totalCount==0)]
+mapsExisting <- maps
+for(sp in noDataSpecies){
+  mapsExisting <- mapsExisting[-which(mapsExisting$Species==sp),]
 }
 
-#Plot the data
-pdf(plotOutputName, compress=T, width=10)
-ggplot(MQprop, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mapping bar plot w/ unmapped", sep=" "))+labs(x = "Species", y="Percentage")+fillLegend+themeUnmap+scale_y_continuous(limits=c(0,100))
-ggplot(MQpropPos, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mappping bar plot w/out unmapped", sep=" "))+labs(x = "Species", y = "Percentage")+fillLegend+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))+scale_y_continuous(limits=c(0,100))
-options(warn = -1)
-ggplot(maps, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Mapping quality", sep=" "))+labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
-#ggplot(mapsNonZero, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Positive Mapping violin (count scaled)", sep=" "))+ labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
-
-options(warn = 1)
-
-dev.off()
-
+###ChiSquared test###
 countSpecies <- matrix(0,nrow=61, ncol=1)
 countSpecies <- data.frame(countSpecies)
 for (species in uniSpecies){
@@ -159,20 +116,13 @@ posSum <- c(posSum, unmappedCount)
 names(posSum)[length(posSum)] <- "Unmapped"
 countChisq <- chisq.test(posSum)
 #print(countChisq$p.value)
-countContrib <- 10000*(countChisq$residuals/countChisq$statistic)
 #print(countChisq$residuals)
 countRes <- t(data.frame(countChisq$residuals))
 namesRes <- t(data.frame(names(countChisq$residuals)))
 countRes <- rbind(namesRes, countRes)
-countCorrectedContrib <- countContrib-countContrib[length(countContrib)]
 
 MQ60 <- posCount[60,]
-#MQ60$Unmapped <- 0
 mq60chisq <- chisq.test(x=MQ60)
-#print(mq60chisq$p.value)
-#mq60contrib <- 100*(mq60chisq$stdres^2/mq60chisq$statistic)
-#names(mq60contrib) <- colnames(MQ60)
-#print(mq60chisq$residuals)
 mq60Res <- t(data.frame(mq60chisq$residuals))
 namesRes60 <- namesRes[-length(namesRes)]
 mq60Res <- rbind(namesRes60, mq60Res)
@@ -182,81 +132,52 @@ write(countRes, file=chiSqOutName, append=T)
 write(paste(strainName, " MQ60 - Chi Squared P-value ", toString(mq60chisq$p.value), sep=""), file=chiSqOutName, append=T)
 write(mq60Res, file=chiSqOutName, append=T)
 
-# MQ0 <- countSpecies[1,]
-# chisq0 <- chisq.test(MQ0)
-# contrib <- 100*chisq0$residuals^2/chisq0$statistic
-# contribDF <- t(data.frame(contrib))
-# contribDF <- cbind(contribDF, chisq0$p.value)
-# chisqList <- list()
-# chisqList[[1]] <- chisq0 
-# contribOut <- contribDF
-# for (i in c(1:60)){
-#   MQdata <- countSpecies[(i+1),]
-#   chisq <- chisq.test(MQdata)
-#   contrib <- 100*chisq$residuals^2/chisq$statistic
-#   contribDF <- t(data.frame(contrib))
-#   contribDF <- cbind(contribDF, chisq$p.value)
-#   chisqList[[(i+1)]] <- chisq
-#   contribOut <- rbind(contribOut, contribDF)
-# }
-# header <- c(as.character(uniSpecies),"p-value")
-# colnames(contribOut) <- header
-# rownames(contribOut) <- c(0:60)
-#corrplot(contribOut, is.cor=F)
+#Set color for number of species
+pdf(NULL)
+if (length(uniSpecies)>2) {
+  colorList <- palette(rainbow(length(uniSpecies)-1))
+  colorList <- palette(rainbow(length(uniSpecies)-1))
+} else {
+  colorList <- c("red")
+}
+#Assign colors for each species
+colors <- c()
+for (i in uniSpecies[2:length(uniSpecies)]){
+  index <- which(uniSpecies %in% i)-1
+  colors[gsub("_", spRe, i)] <- colorList[index]
+}
+colors["Unmapped"] <- "darkgrey"
+#Replace "_" with spaces for dataframes
+MQdf$Species <- gsub("_", spRe, MQdf$Species)
+MQpropPos$Species <- gsub("_", spRe, MQpropPos$Species)
+MQprop$Species <- gsub("_", spRe, MQprop$Species)
+maps$Species <- gsub("_", spRe, maps$Species)
+mapsExisting$Species <- gsub("_", spRe, mapsExisting$Species)
+mapsNonZero$Species <- gsub("_", spRe, mapsNonZero$Species)
+spcLabels <- gsub("_", spRe, uniSpecies)
+violin_df$Species <- gsub("_", spRe, violin_df$Species)
+#Set color legends
+fillLegend <- scale_fill_manual(name="Species", values = colors, breaks=spcLabels)
+colorLegend <- scale_colour_manual(name="Species", values = colors, breaks=spcLabels)
+theme <- theme_bw()+theme(legend.text=element_text(face="italic"), axis.text.x=element_text(face="italic"))
+#Remove labels if too many species will make it cluttered.
+if (length(uniSpecies)>11){
+  themeUnmap <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
+  theme <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
+} else if (length(uniSpecies)==11) { 
+  themeUnmap <- theme_bw()+theme(axis.text.x=element_blank(), legend.text=element_text(face="italic"))
+} else {
+  themeUnmap <- theme 
+}
 
-# MQ1 <- posCount[1,]
-# chisq1 <- chisq.test(MQ1)
-# contrib <- 100*chisq1$residuals^2/chisq1$statistic
-# contribDF <- t(data.frame(contrib))
-# contribDF <- cbind(contribDF, chisq1$p.value)
-# chisqList <- list()
-# chisqList[[1]] <- chisq1 
-# contribPos <- contribDF
-# for (i in c(2:59)){
-#   MQdata <- posCount[(i+1),]
-#   chisq <- chisq.test(MQdata)
-#   contrib <- 100*chisq$residuals^2/chisq$statistic
-#   contribDF <- t(data.frame(contrib))
-#   contribDF <- cbind(contribDF, chisq$p.value)
-#   chisqList[[(i+1)]] <- chisq
-#   contribPos <- rbind(contribPos, contribDF)
-# }
-# header <- c(as.character(uniSpecies[2:length(uniSpecies)]),"p-value")
-# colnames(contribPos) <- header
-# rownames(contribPos) <- c(1:60)
-# corrplot(contribPos, is.cor=F)
+#Plot the data
+pdf(plotOutputName, compress=T, width=10)
+ggplot(MQprop, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mapping bar plot w/ unmapped", sep=" "))+labs(x = "Species", y="Percentage")+fillLegend+themeUnmap+scale_y_continuous(limits=c(0,100))
+ggplot(MQpropPos, aes(x=factor(Species, levels=spcLabels)))+geom_bar(aes(fill=Species, weight=Percentage))+ggtitle(paste(strainName, "Mappping bar plot w/out unmapped", sep=" "))+labs(x = "Species", y = "Percentage")+fillLegend+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))+scale_y_continuous(limits=c(0,100))
+options(warn = -1)
+ggplot(mapsExisting, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Mapping quality of species with mapped reads", sep=" "))+labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
+#ggplot(mapsNonZero, aes(factor(Species, levels=spcLabels), MQscore, weight=count))+ geom_violin(bw=1, scale = "count", draw_quantiles=c(.25,.5,.75), aes(fill=Species))+fillLegend+colorLegend+ggtitle(paste(strainName, "Positive Mapping violin (count scaled)", sep=" "))+ labs(x = "Species")+theme(axis.text.x=element_text(face="italic"))+theme+theme(legend.text=element_text(face="italic"))
 
-#top10posCount <-posCount[50:60,]
-#chisq <- chisq.test(top10posCount)
+options(warn = 1)
 
-#contribOut.Pval <- contribOut
-#contribOut <- contribOut[,-ncol(contribOut)]
-#unmappedContrib <- contribOut[,1]
-#for (i in 2:ncol(contribOut)){
-#   spDataCorrected <- contribOut[,i]-unmappedContrib
-#   if (i==2) {
-#     correctedOut <- data.frame(spDataCorrected)
-#   } else {
-#     correctedOut <- cbind(correctedOut, spDataCorrected)
-#   }
-#   correctedOut[which(correctedOut[,(i-1)]<0),(i-1)] <- 0
-# }
-# nonZeroCorrected <- correctedOut[-1,]
-# nonZeroCorMeans <- colMeans(nonZeroCorrected)
-# avgContrib <- colMeans(correctedOut)
-# top10 <- correctedOut[51:61,]
-# top10mean <- colMeans(top10)
-# contribTop <- t(contribOut[56:61,-ncol(contribOut)])
-# lenCols <- ncol(contribTop)
-# for (i in 1:lenCols){
-#   contribTop <- cbind(contribTop, (contribTop[,i]-contribTop[1,i]))
-#   contribTop[which(contribTop[,(lenCols+i)]<0),(lenCols+i)] <- 0
-# }
-# 
-# avgContrib <- rowMeans(contribTop[,(lenCols+1):ncol(contribTop)])
-# 
-# rownames(contrib60) <- as.character(uniSpecies)
-# contrib60$corrected <- contrib60$contrib - contrib60[1,1]
-# contrib60$corrected[which(contrib60$corrected<0)] <- 0
-# contrib60$Species <- uniSpecies
-
+dev.off()

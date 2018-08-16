@@ -84,10 +84,16 @@ for (i in 1:(length(antimodes)+1)) {
 }
 #head(binInfo)
 numBinsWanted <- max(which(binInfo$numWin>=500))+1
-binsWanted <- binInfo[1:numBinsWanted,]
-binsWanted$meanCovUpper <- (2^binsWanted$log2BinEnd)*checkMean
 binInfo$meanCovUpper <- (2^binInfo$log2BinEnd)*checkMean
-write.table(binsWanted, file=paste(outputPrefix, "_globalBinsIncluded.txt", sep=""), row.names = F)
+binsWanted <- binInfo[1:numBinsWanted,]
+binsToWrite <- binInfo[1:(numBinsWanted+1),]
+binsToWrite$binName[1] <- "belowThreshold"
+binsToWrite$binName[(numBinsWanted+1)] <- "aboveUpperBin"
+binsToWrite$log2BinEnd[(numBinsWanted+1)] <- binInfo$log2BinEnd[nrow(binInfo)]
+binsToWrite$numWin[(numBinsWanted+1)] <- sum(binInfo$numWin[(numBinsWanted+1):nrow(binInfo)])
+binsToWrite$perData[(numBinsWanted+1)] <- sum(binInfo$perData[(numBinsWanted+1):nrow(binInfo)])
+binsToWrite$meanCovUpper[(numBinsWanted+1)] <- binInfo$meanCovUpper[nrow(binInfo)]
+write.table(binsToWrite, file=paste(outputPrefix, "_globalBinsIncluded.txt", sep=""), row.names = F)
 
 binOut <- bedData
 binOut$covBin <- "aboveUpperBin"
@@ -149,7 +155,7 @@ binTemp <- data.frame(data=binSum)
 binDF <- data.frame(do.call('rbind', strsplit(as.character(binTemp$data),',',fixed=TRUE)))
 colnames(binDF) <- binHeader
 spSum <- cbind(spSum, binDF[,2:ncol(binDF)])
-write.table(spSum, file=paste(outputPrefix, "_covBinsSummary.txt", sep=""), row.names = F)
+write.table(spSum, file=paste(outputPrefix, "_covBinsSummary.txt", sep=""), row.names = F, quote = FALSE)
 
 sigSpecies <- spSum$species[which(spSum$contributes==T)]
 sigSpecies <- factor(sigSpecies, levels=sigSpecies)
