@@ -1,6 +1,6 @@
 __author__ = 'Quinn'
 
-import argparse, multiprocessing, sys, re, subprocess, time
+import argparse, multiprocessing, sys, re, subprocess, time, os
 
 ################################################################
 # This script runs the full sppIDer pipeline.
@@ -18,6 +18,7 @@ parser.add_argument('--out', help="Output prefix, required", required=True)
 parser.add_argument('--ref', help="Reference Genome, required", required=True)
 parser.add_argument('--r1', help="Read1, required", required=True)
 parser.add_argument('--r2', help="Read2, optional")
+parser.add_argument('--delete', help="Delete BAM/SAM and Bedgraph files after completion, optional")
 parser.add_argument('--byBP', help="Calculate coverage by basepair, optional, DEFAULT, can't be used with -byGroup", dest='bed', action='store_true')
 parser.add_argument('--byGroup', help="Calculate coverage by chunks of same coverage, optional, can't be used with -byBP", dest='bed', action='store_false')
 parser.set_defaults(bed=True)
@@ -173,4 +174,11 @@ print("Elapsed time: " + elapsedTime)
 trackerOut = open(workingDir + outputPrefix + "_sppIDerRun.info", 'a')
 trackerOut.write("\nPlot complete\nElapsed time: " + elapsedTime + "\n")
 trackerOut.close()
+
+if args.delete
+   print("Cleaning up working files")
+   os.remove(outputPrefix + ".sam")
+   os.remove(outputPrefix + ".sort.bam")
+   os.remove(outputPrefix + ".view.bam")
+   os.remove(outputPrefix + "-d.bedgraph")
 
